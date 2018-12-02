@@ -208,7 +208,7 @@ inférieur à dateFin, heureDebut est inférieur à heureFin, le nombre de jour 
 n'excède pas 30 jours. */
 var creerSondage = function(titre, id, dateDebut, dateFin, heureDebut, heureFin) {
     
-    var e = document.getElementById("error"); // error id in HTML
+    //var e = document.getElementById("error"); // error id in HTML
 	
 	// nombre de jour entre dateDebut et dateFin
     var ecartJour = jourEntreDate(dateDebut, dateFin);
@@ -219,23 +219,23 @@ var creerSondage = function(titre, id, dateDebut, dateFin, heureDebut, heureFin)
     
     // Si le id ne contient pas des caractères valides, retourne false. 
     if(!caracValide(id.split(""))) {
-		e.innerHTML = "Erreur: l'identifiant peut uniquement contenir" +
-		" des lettres, chiffres et tirets";
+	//	e.innerHTML = "Erreur: l'identifiant peut uniquement contenir" +
+	//	" des lettres, chiffres et tirets";
 		return false; 
     }
 	// L’identifiant de sondage correspond à un sondage existant
     
     // Si dateDébut est supérieure à dateFin, retourne msg d'erreur et false. 
     if(ecartJour < 0) {
-		e.innerHTML = "Erreur: La date de fin doit être après la date " +
-		" de début.";
+	//	e.innerHTML = "Erreur: La date de fin doit être après la date " +
+	//	" de début.";
 		return false; 
     }
 	
 	// Si nombre de jours est supérieur à 30, retourne msg d'erreur et false.
     if(ecartJour > 30) {
-		e.innerHTML = "Erreur: La durée maximale d’un sondage est de 30 " +
-		"jours";
+	//	e.innerHTML = "Erreur: La durée maximale d’un sondage est de 30 " +
+	//	"jours";
 		return false; 
     }
     
