@@ -39,6 +39,8 @@ var mimes = {
     '.js': 'text/javascript',
 };
 
+var tabSondage = []; // tableau qui contient les informations des sondages
+
 // --- Helpers ---
 var readFile = function (path) {
     return fs.readFileSync(path).toString('utf8');
@@ -138,20 +140,23 @@ var mois = [
 var MILLIS_PAR_JOUR = (24 * 60 * 60 * 1000);
 
 // Retourne le texte HTML à afficher à l'utilisateur pour répondre au
-// sondage demandé.
-//
-// Doit retourner false si le calendrier demandé n'existe pas
+// sondage demandé. Retourne false si le calendrier demandé n'existe pas
 var getCalendar = function (sondageId) {
-    // TODO
+	
+	
+	
+	if(sondageExiste(sondageId)) return false;
+	
     return 'Calendrier <b>' + sondageId + '</b> (TODO)';
 };
 
-// Retourne le texte HTML à afficher à l'utilisateur pour voir les
-// résultats du sondage demandé
-//
-// Doit retourner false si le calendrier demandé n'existe pas
+/* Retourne le texte HTML à afficher à l'utilisateur pour voir les résultats de 
+sondage demandé. Retourne false si le calendrier demandé n'existe pas. */
 var getResults = function (sondageId) {
     // TODO
+	
+	if(sondageExiste(sondageId)) return false;
+	
     return 'Resultats du sondage <b>' + sondageId + '</b> (TODO)';
 };
 
@@ -185,9 +190,9 @@ var convDateEnJour = function (date){
     var date = date.split("-"); 
     date = {annee: +date[0], mois: +date[1], jour: +date[2]};
     
-    var nbCycle = Math.floor((date.annee - 1)/4);
-    var nbAnnee = date.annee - (nbCycle * 4);
-    var nbMois = (date.mois + 9)%12;
+    var nbCycle = Math.floor((date.annee - 1)/4); // 4 années par cycle complet
+    var nbAnnee = date.annee - (nbCycle * 4); // nb d'années complètes 
+    var nbMois = (date.mois + 9)%12; // nb mois complets
     
     var nbJourCycle = 1461 * nbCycle; // 1461 jours par cycle
     var nbJourAnnee = 365 * nbAnnee;
@@ -201,6 +206,21 @@ var jourEntreDate = function(dateDebut, dateFin){
     return convDateEnJour(dateFin) - convDateEnJour(dateDebut);
 };
 
+/* Fonction qui vérifie si le sondage (id) a déjà été enregistré par un 
+utilisateur. Retourne false si le sondage n'existe pas et true s'il existe. */
+var sondageExiste = function (id){
+	
+	if(tabSondage == []) return false; // si le tableau de sondage est vide
+	
+	for(var i = 0; i < tabSondage.length; i++){
+		if(tabSondage[i][1] == id){ // si le sondage est dans le tableau
+			return true;
+		}
+	}
+	
+	return false; 
+};
+
 /* Fonction qui crée un sondage à partir des informations entrées. Retourne false 
 si les informations ne sont pas valides et true si elles sont valides. Vérifie diverses
 conditions (ex. Id contient uniquement des lettres, chiffres ou tirets, dateDebut est 
@@ -208,43 +228,61 @@ inférieur à dateFin, heureDebut est inférieur à heureFin, le nombre de jour 
 n'excède pas 30 jours. */
 var creerSondage = function(titre, id, dateDebut, dateFin, heureDebut, heureFin) {
     
-    //var e = document.getElementById("error"); // error id in HTML
 	
 	// nombre de jour entre dateDebut et dateFin
     var ecartJour = jourEntreDate(dateDebut, dateFin);
     
+	// converti l'heure en valeur numérique
     var heureDebut = +heureDebut.slice(0, heureDebut.length - 1);
     var heureFin = +heureFin.slice(0, heureFin.length - 1);
     var ecartHeure = heureFin - heureDebut;
+	
+	// lit le fichier index.html et assigne le id error à la variable erreur
+	var erreurFichier = readFile("template/index.html"); 
+	var erreur = document.getElementById("error"); 
     
     // Si le id ne contient pas des caractères valides, retourne false. 
-    if(!caracValide(id.split(""))) {
-	//	e.innerHTML = "Erreur: l'identifiant peut uniquement contenir" +
-	//	" des lettres, chiffres et tirets";
+    if(titre == "") {
+		erreur.innerHTML = "Erreur: Veuillez entrer un titre au sondage.";
 		return false; 
     }
-	// L’identifiant de sondage correspond à un sondage existant
+	
+	// Si le id ne contient pas des caractères valides, retourne false. 
+    if(!caracValide(id.split("")) && id == "") {
+		erreur.innerHTML = "Erreur: l'identifiant doit contenir des lettres, " +
+		"chiffres et tirets.";
+		return false; 
+    }
     
     // Si dateDébut est supérieure à dateFin, retourne msg d'erreur et false. 
     if(ecartJour < 0) {
-	//	e.innerHTML = "Erreur: La date de fin doit être après la date " +
-	//	" de début.";
+		erreur.innerHTML = "Erreur: La date de fin doit être après la date " +
+		" de début.";
 		return false; 
     }
 	
 	// Si nombre de jours est supérieur à 30, retourne msg d'erreur et false.
     if(ecartJour > 30) {
-	//	e.innerHTML = "Erreur: La durée maximale d’un sondage est de 30 " +
-	//	"jours";
+		erreur.innerHTML = "Erreur: La durée maximale d’un sondage est de 30 " +
+		"jours.";
 		return false; 
     }
     
-    // Si heureDebut est supérieur à heureFin, retourne false. 
+    // Si heureDebut est supérieur à heureFin, retourne msg d'erreur et false.
     if(ecartHeure < 0) {
-		//e.innerHTML = "Erreur: L’heure de fin doit être après l’heure " +
-		//"de début.";	
+		erreur.innerHTML = "Erreur: L’heure de fin doit être après l’heure " +
+		"de début.";	
 		return false; 
   	}
+	
+	// Si sondage existe, retourne msg d'erreur et false.
+	if(sondageExiste(id)){
+		erreur.innerHTML = "Erreur: L’identifiant de sondage correspond à un " +
+		"sondage existant." ;
+		return false;
+	};
+	
+	tabSondage.push(titre, id, dateDebut, dateFin, heureDebut, heureFin);
     return true;
 };
 
