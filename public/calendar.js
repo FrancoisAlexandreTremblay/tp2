@@ -3,9 +3,95 @@
 
 'use strict';
 
+/* Cette fonction permet d'intéragir avec l'utilisateur quand il clique sur un 
+bouton */ 
 document.addEventListener('DOMContentLoaded', function() {
-    // TODO: Ajoutez ici du code qui doit s'exécuter au chargement de
-    // la page
+	
+	var cal = document.getElementById("calendrier");
+	
+	if(cal == null) return ;
+	
+	var nbHeures = cal.dataset.nbheures;
+	var nbJours = cal.dataset.nbjours;
+	
+	cal.addEventListner("mousedown", onClick);
+	cal.addEventListner("mouseover", onMove);
+
+});
+
+	var mat = Array(nbHeures + 1).fill(Array(nbJours).fill(0));
+
+<table id = "calendrier" 
+	onmousedown = "onClick(event)"
+	onmouseover = "onMove(event)" 
+	data-nbjours = nbJours
+	data-nbheures = nbHeures>
+	
+	// initialise la première ligne
+	<tr>
+		<<th></th>
+	mat[0].map(function(ligne) { return tag("th", "", ligne + "Nov"); });
+	</tr> 
+	
+	// initialise les lignes subséquentes
+    return tag("table", style(bordure), mat.map(function(ligne, i) { // table
+        return tag("tr", "", ligne.map(function(cell, j) { // ligne
+
+            if((i + j) % 2 == 1) { // si cellule est un nombre impair
+
+                // cellule verte
+                return tag("td", style(vert), unicodePiece(cell));
+
+            } else {
+
+                // cellule blanche
+                return tag("td", style(blanc), unicodePiece(cell));
+            }
+
+        }).join(""));
+    }).join(""));
+	
+	
+	for(var i = 1; i <= nbJours; i++){
+		tag("th", )
+	}
+
+    <tr>
+		<th></th>
+		<th>18 Nov</th> 
+		<th>19 Nov</th> 
+		<th>20 Nov</th> ...
+	</tr> 
+	<tr>
+		<th>7h</th>
+		<td id="0-0"></td> 
+		<td id="1-0"></td> 
+		<td id="2-0"></td>
+	</tr>
+	
+	</table>
+	
+
+	var cadreDuJeu = function (mat) {
+
+	    return tag("table", style(bordure), mat.map(function(ligne, i) { // table
+	        return tag("tr", "", ligne.map(function(cell, j) { // ligne
+
+	            if((i + j) % 2 == 1) { // si cellule est un nombre impair
+
+	                // cellule verte
+	                return tag("td", style(vert), unicodePiece(cell));
+
+	            } else {
+
+	                // cellule blanche
+	                return tag("td", style(blanc), unicodePiece(cell));
+	            }
+
+	        }).join(""));
+	    }).join(""));
+
+	};
 });
 
 function onClick(event) {
@@ -27,8 +113,11 @@ function onMove(event) {
     var id = t.id;
 }
 
+// Fonction qui retourne l'encodage des dispnibilités des participants
 var compacterDisponibilites = function() {
-    // TODO
+    
+	//for(var i = 0)
+	//for(var j = 0)
 
     return '0000000';
 };

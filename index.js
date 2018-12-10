@@ -39,8 +39,6 @@ var mimes = {
     '.js': 'text/javascript',
 };
 
-var tabSondage = []; // tableau qui contient les informations des sondages
-
 // --- Helpers ---
 var readFile = function (path) {
     return fs.readFileSync(path).toString('utf8');
@@ -130,7 +128,13 @@ var getIndex = function (replacements) {
 };
 
 
-// --- À compléter ---
+//********** Programme d'interaction -  **************
+
+//|---- Fonctions principales ----
+//		|--- creerSondage()
+//		|--- getCalendar() 
+
+var tabSondage = []; // tableau qui contient les informations des sondages
 
 var mois = [
     'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin',
@@ -139,25 +143,135 @@ var mois = [
 
 var MILLIS_PAR_JOUR = (24 * 60 * 60 * 1000);
 
-// Retourne le texte HTML à afficher à l'utilisateur pour répondre au
-// sondage demandé. Retourne false si le calendrier demandé n'existe pas
+// Fonction qui écrit un sondage CSV si le fichier n'existe pas déjà
+var ecrireCSV = function (path, matrice) {
+	
+	var contenu = matrice.join(",") + "\n";
+	writeFile(path, contenu);
+};
+
+
+
+// Fonction qui retourne la position d'un sondage dans le tableau des sondages
+//var positionSondage = function(sondageId){
+	
+//	for(var i = 0; i < tabSondage.length; i++){
+//		if(tabSondage[i][1] == sondageId){ // si le sondage est dans le tableau
+//			return i;
+//		}
+//	}
+//};
+
+// Fonction qui retourne les balises d'un élément en HTML.
+var tag = function(nom, attr, contenu) {
+    return "<"+ nom +" " + attr + ">" + contenu + "</" + nom + ">";
+};
+
+/* Fonction qui modifie des mots dans un texte en les remplaçants par d'autres 
+mots. */ 
+var modifierTxt = function (texte, mot, autre){
+	return texte.split(mot).join(autre);
+};
+
+/* Fonction qui construit des tableaux de jours/mois entre deux dates. 
+ ex. tabJourMois(2018-11-12, 2018-11-14) retourne [12 nov, 13 nov, 14 nov] */ 
+var tabJourMois = function (dateDebut, dateFin){
+	
+	var debut = +dateDebut.split("-")[2];
+	var moisDebut = dateDebut.split("-")[1];
+	
+	var fin = +dateFin.split("-")[2];
+	var moisFin = dateFin.split("-")[1];
+	
+	var ecart = jourEntreDate(dateDebut, dateFin);
+	
+	var resultat = [];
+	
+	for(var i = 0; i <= ecart; i++){
+		
+		if (fin - i > 0){
+			resultat.unshift(fin - i + " " + (mois[moisFin] - 1);
+			
+		} else {
+			resultat.unshift(debut + ecart - i + " " + (mois[moisDebut] - 1));
+		}
+	}
+	
+	return [resultat];
+};
+
+var tabHeure = function (heureDebut, heureFin){
+	
+	var resultat= [];
+	
+	for(var i = heureDebut; i <= heureFin; i++){
+		resultat.push(i + "h");
+	}
+	return resultat;
+};
+
+// Fonction qui initialise la table de la fonction getCalendar().
+var initTable = function(){
+	
+	var nbJours = tabSondage[6]; // nb jours du sondage
+	var nbHeures = tabSondage[7]; // nb heures du sondage
+	
+	/* tableau des jours et des heures entre les deux dates du sondage 
+	ex: [17 nov,18 nov,...] */
+	var tabJours = tabJourMois(tabSondage[2], tabSondage[3]); 
+	var tabHeures = tabHeure(tabSondage[4], tabSondage[5]);
+	
+	// initialise les cellules du tableau
+	var mat = Array(nbHeures).fill(Array(nbJours).fill(""));
+	
+	// Ajoute les heures glitch 
+	mat.map(function(ligne, i) { 
+		return ligne.unshift(tabHeures[i]); 
+	});
+	
+	tabJours.concat(mat);
+	
+	// première rangée correspond à des jours
+	
+	
+	// première colonne correspond à des heures
+	
+	
+	// première cellule en haut à gauche est vide
+	mat[0][0] = 3; 
+	
+	
+}
+
+/* Retourne le texte HTML à afficher à l'utilisateur pour répondre au
+sondage demandé. Retourne false si le calendrier demandé n'existe pas. */
 var getCalendar = function (sondageId) {
 	
+	var texte = readFile("template/calendar.html");
 	
+	var titre = readFile("template/CSV/" + sondageId + ".csv").split(",")[0];
+	var table = iniTable(); 
+	var url = "http://localhost:1337/" + sondageId;
 	
-	if(sondageExiste(sondageId)) return false;
+	var ancienItem = ["{{titre}}", "{{table}}", "{{url}}"]; 
+	var nouvelItem = [titre, table, url];
 	
-    return 'Calendrier <b>' + sondageId + '</b> (TODO)';
+	//remplacer les anciens items du fichier par les nouveaux items
+	for(var i = 0; i < nouvelItem.length; i++){
+		texte = modifierTxt(texte, ancienItem[i], nouvelItem[i]);
+	}
+	
+	// return false si le calendrier n'existe pas
+	
+    return contenu;
 };
 
 /* Retourne le texte HTML à afficher à l'utilisateur pour voir les résultats de 
 sondage demandé. Retourne false si le calendrier demandé n'existe pas. */
 var getResults = function (sondageId) {
-    // TODO
+    
 	
-	if(sondageExiste(sondageId)) return false;
-	
-    return 'Resultats du sondage <b>' + sondageId + '</b> (TODO)';
+    return 'Resultats du sondage <b>' + SondageId + '</b> (TODO)';
 };
 
 
@@ -184,7 +298,8 @@ var caracValide = function(tabCar){
     return true;
 };
 
-// Fonction qui converti une date en nombre de jour.
+/* Fonction qui converti une date en nombre de jour. glitch (prendre la 
+fonction du premier exercice). */
 var convDateEnJour = function (date){
     
     var date = date.split("-"); 
@@ -207,13 +322,17 @@ var jourEntreDate = function(dateDebut, dateFin){
 };
 
 /* Fonction qui vérifie si le sondage (id) a déjà été enregistré par un 
-utilisateur. Retourne false si le sondage n'existe pas et true s'il existe. */
+utilisateur dans le document CSV. Retourne false si le sondage n'existe pas et 
+true s'il existe. */
 var sondageExiste = function (id){
 	
-	if(tabSondage == []) return false; // si le tableau de sondage est vide
+	// liste les sondages dans le document
+	var sondage = fs.readdirSync("template/CSV"); 
 	
-	for(var i = 0; i < tabSondage.length; i++){
-		if(tabSondage[i][1] == id){ // si le sondage est dans le tableau
+	if(sondage == []) return false; // si le dossier de sondage est vide
+	
+	for(var i = 0; i < sondage.length; i++){
+		if(sondage[i] == (id + ".csv")){ // si le sondage est dans le dossier
 			return true;
 		}
 	}
@@ -231,58 +350,61 @@ var creerSondage = function(titre, id, dateDebut, dateFin, heureDebut, heureFin)
 	
 	// nombre de jour entre dateDebut et dateFin
     var ecartJour = jourEntreDate(dateDebut, dateFin);
-    
-	// converti l'heure en valeur numérique
-    var heureDebut = +heureDebut.slice(0, heureDebut.length - 1);
-    var heureFin = +heureFin.slice(0, heureFin.length - 1);
     var ecartHeure = heureFin - heureDebut;
 	
-	// lit le fichier index.html et assigne le id error à la variable erreur
-	var erreurFichier = readFile("template/index.html"); 
-	var erreur = document.getElementById("error"); 
-    
-    // Si le id ne contient pas des caractères valides, retourne false. 
-    if(titre == "") {
-		erreur.innerHTML = "Erreur: Veuillez entrer un titre au sondage.";
-		return false; 
-    }
+	var texte = readFile("template/index.html");
+	var txtAModifier = ["Erreur : assurez-vous d'entrer des données valides."];
+	var msgErreur = [];
 	
 	// Si le id ne contient pas des caractères valides, retourne false. 
-    if(!caracValide(id.split("")) && id == "") {
-		erreur.innerHTML = "Erreur: l'identifiant doit contenir des lettres, " +
-		"chiffres et tirets.";
-		return false; 
+    if(!caracValide(id.split("")) || id == "") {
+		msgErreur = msgErreur.concat("Erreur: l\'identifiant doit contenir des" + 
+		" lettres, chiffres ou tirets.");
     }
     
     // Si dateDébut est supérieure à dateFin, retourne msg d'erreur et false. 
     if(ecartJour < 0) {
-		erreur.innerHTML = "Erreur: La date de fin doit être après la date " +
-		" de début.";
-		return false; 
+		msgErreur = msgErreur.concat("Erreur: La date de fin doit être après" +
+		" la date de début.");
     }
 	
 	// Si nombre de jours est supérieur à 30, retourne msg d'erreur et false.
     if(ecartJour > 30) {
-		erreur.innerHTML = "Erreur: La durée maximale d’un sondage est de 30 " +
-		"jours.";
-		return false; 
+		msgErreur = msgErreur.concat("Erreur: La durée maximale du sondage" + 
+		" est de 30 jours.");
     }
     
     // Si heureDebut est supérieur à heureFin, retourne msg d'erreur et false.
-    if(ecartHeure < 0) {
-		erreur.innerHTML = "Erreur: L’heure de fin doit être après l’heure " +
-		"de début.";	
-		return false; 
+    if(ecartHeure < 0 && ecartJour == 0) {
+		msgErreur = msgErreur.concat("Erreur: L\’heure de fin doit être après" +
+		" l\’heure de début.");	
   	}
 	
 	// Si sondage existe, retourne msg d'erreur et false.
 	if(sondageExiste(id)){
-		erreur.innerHTML = "Erreur: L’identifiant de sondage correspond à un " +
-		"sondage existant." ;
-		return false;
+		msgErreur = msgErreur.concat("Erreur: L\’identifiant de sondage " +
+		"correspond à un sondage existant.");
 	};
 	
-	tabSondage.push(titre, id, dateDebut, dateFin, heureDebut, heureFin);
+	// Cela ne fonctionne pas encore... Il doit y avoir une problème avec le serveur... On devrait appeller la fonction à partir du html !!!  glitch
+	if(msgErreur != ""){ // si une des erreur survient...
+		
+		console.log(msgErreur);
+		texte = texte.split(txtAModifier).join(msgErreur);
+		console.log(texte);
+		return texte;
+	}
+	
+	// Peut-être que la meilleur façon de stocker les participants serait dans 
+	// un tableau plutôt que dans un fichier. Chaque sondage est un élément d'un tableau. Chaque élément contient Dans chaque sondage, il y a les éléments ci-dessous. Dans participant, il pourrait y avoir un autre tableau qui liste les disponibilités des participants. glitch
+	var matrice = [titre, id, dateDebut, dateFin, heureDebut, heureFin, 
+		ecartJour, ecartHeure, "Participants"];
+	var path = "template/CSV/" + id + ".csv";
+	
+	tabSondage = matrice; 
+	
+	ecrireCSV(path, matrice);
+	
     return true;
 };
 
@@ -349,7 +471,7 @@ http.createServer(function (requete, reponse) {
 
                 var data = getCalendar(id);
 
-                if(data === false) {
+                if(data === false) { // si get calendar est faux
                     redirect(reponse, '/error404.html');
                     return;
                 }
@@ -376,7 +498,7 @@ http.createServer(function (requete, reponse) {
         }
     }
 
-    sendPage(reponse, doc);
+    sendPage(reponse, doc); // fonction qui va être appellé
 
 }).listen(port);
 
