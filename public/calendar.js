@@ -9,13 +9,13 @@ document.addEventListener('DOMContentLoaded', function() {
 	
 	var cal = document.getElementById("calendrier");
 	
-	if(cal == null) return ;
+	if(cal == null) return;
 	
 	var nbHeures = cal.dataset.nbheures;
 	var nbJours = cal.dataset.nbjours;
 	
-	cal.addEventListner("mousedown", onClick);
-	cal.addEventListner("mouseover", onMove);
+	cal.addEventListner("onmousedown", onClick);
+	cal.addEventListner("onmouseover", onMove);
 
 });
 

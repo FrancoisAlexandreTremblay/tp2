@@ -227,11 +227,9 @@ var tabId = function (ligne, colonne){
 // Fonction qui initialise la table de la fonction getCalendar().
 var initTable = function(){
 	
-	var nbJours = tabSondage[6]; // nb jours du sondage
-	var nbHeures = tabSondage[7]; // nb heures du sondage
-	
 	// tableau des jours entre les deux dates du sondage ex: [17 nov,18 nov,..] 
-	var tabJours = tabJourMois(tabSondage[2], tabSondage[3]); 
+	var tabJours = tabJourMois(tabSondage[2], tabSondage[3]);
+	tabJour.unshift(""); // ajoute une cellule vide dans tabJour
 	
 	// tableau des heures entre heureDébut et heureFin ex: [7h,8h,9h...] 
 	var tabHeures = tabHeure(tabSondage[4], tabSondage[5]);
@@ -239,26 +237,29 @@ var initTable = function(){
 	// tableau des Id
 	var tabId = tabId(tabHeures.length, tabJours.length);
 	
-	return 
 	
-	// Ajoute les heures glitch 
-	mat.map(function(ligne, i) { 
-		return ligne.unshift(tabHeures[i]); 
+	tabId.map(function (x, j){ // fusionne tabId et tabHeure
+		return x.unshift(tabHeure[j]); 
 	});
 	
-	tabJours.concat(mat);
+	tabId.unshift(tabJour);// fusionne tabJour au nouveau tableau tabId 
 	
-	// première rangée correspond à des jours
-	
-	
-	// première colonne correspond à des heures
-	
-	
-	// première cellule en haut à gauche est vide
-	mat[0][0] = 3; 
-	
-	
+	return tabId; 
 };
+
+/* Fonction qui retourne un tableau encodé en HTML. Prend en paramètre un 
+tableau d'élément qui seront utilisé pour constituer le tableau. */
+var calendrierHTML = function(table){
+	
+	var contenu = "<table id = "calendrier" onmousedown = "onClick(event)" + "
+	onmouseover = "onMove(event)" " + "data-nbjours =" + nbJours + "
+	data-nbheures = nbHeures>"";
+	
+	// initialise la première ligne
+	<tr>
+		<<th></th>
+	
+}
 
 /* Retourne le texte HTML à afficher à l'utilisateur pour répondre au
 sondage demandé. Retourne false si le calendrier demandé n'existe pas. */
