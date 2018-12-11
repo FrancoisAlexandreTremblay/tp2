@@ -1,6 +1,5 @@
 // 14 décembre 2018
 // François-Alexandre Tremblay et Sebastian Dragomirescu
-
 /* Ce programme permet de générer une application web de dans le style du site
 doodle qui permet de planifier des réunions et autres activités aux moments qui
 conviennent le mieux à tous les participants. Le programme interagit avec les
@@ -188,13 +187,13 @@ var tabJourMois = function (dateDebut, dateFin){
 	
 	var resultat = [];
 	
-	for(var i = 0; i <= ecart; i++){
+	for(var i = 0; i <= ecart; i++){ // loop à travers les jours jusqu'à écart
 		
-		if (fin - i > 0){
-			resultat.unshift(fin - i + " " + (mois[moisFin] - 1);
+		if (fin - i > 0){ // si le jour de la date de fin est supérieur à 0...
+			resultat.unshift(fin - i + " " + mois[moisFin - 1]);
 			
-		} else {
-			resultat.unshift(debut + ecart - i + " " + (mois[moisDebut] - 1));
+		} else { // sinon, ajoute les jours à partir de la date de début 
+			resultat.unshift(debut + ecart - i + " " + mois[moisDebut- 1]);
 		}
 	}
 	
@@ -217,9 +216,10 @@ var initTable = function(){
 	var nbJours = tabSondage[6]; // nb jours du sondage
 	var nbHeures = tabSondage[7]; // nb heures du sondage
 	
-	/* tableau des jours et des heures entre les deux dates du sondage 
-	ex: [17 nov,18 nov,...] */
+	// tableau des jours entre les deux dates du sondage ex: [17 nov,18 nov,..] 
 	var tabJours = tabJourMois(tabSondage[2], tabSondage[3]); 
+	
+	// tableau des heures entre heureDébut et heureFin ex: [7h,8h,9h...] 
 	var tabHeures = tabHeure(tabSondage[4], tabSondage[5]);
 	
 	// initialise les cellules du tableau
