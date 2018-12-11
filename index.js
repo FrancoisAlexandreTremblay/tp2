@@ -253,18 +253,23 @@ var calendrierHTML = function(table){
 	
 	var contenu = "<table id = \"calendrier\n" +
 	"onmousedown = \"onClick(event)\"\n onmouseover = \"onMove(event)\n" + 
-	"data-nbjours =" + tabSondage[6] + "\ndata-nbheures =" + tabSondage[7] + ">";
+	"data-nbjours =" + tabSondage[6] + "\ndata-nbheures =" + tabSondage[7] + 
+	">\n";
 	
 	// initialise la première ligne
 
 	for(var i = 0; i < table.length; i++){
 		for(var j = 0; j < table[0].length; j++){
 		
+			if(i == 0 && j == ){
+				contenu += 
+			}
+		tag("th", "", ligne + "Nov"); 
 		
 		}
 	}
 	
-}
+};
 
 /* Retourne le texte HTML à afficher à l'utilisateur pour répondre au
 sondage demandé. Retourne false si le calendrier demandé n'existe pas. */
@@ -273,7 +278,7 @@ var getCalendar = function (sondageId) {
 	var texte = readFile("template/calendar.html");
 	
 	var titre = readFile("template/CSV/" + sondageId + ".csv").split(",")[0];
-	var table = "hello";//iniTable(); 
+	var table = iniTable(); 
 	var url = "http://localhost:1337/" + sondageId;
 	
 	var ancienItem = ["{{titre}}", "{{table}}", "{{url}}"]; 
