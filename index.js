@@ -307,15 +307,13 @@ var convDateEnJour = function (date){
     var date = date.split("-"); 
     date = {annee: +date[0], mois: +date[1], jour: +date[2]};
     
-var janOuFev = 1 - Math.floor((date.mois + 9)/12);
-var anneeAjustee = date.annee - janOuFev;
-var nbJoursAnneeNonBisextile = 365;
-var quadriennat = 4*nbJoursAnneeNonBisextile + 1;
-var depuis1Mars = Math.ceil((306*(date.mois - 3 + 12*janOuFev)-5)/10);
-
-
-return Math.floor(anneeAjustee/4) * quadriennat
-    + (anneeAjustee%4) * nbJoursAnneeNonBisextile + depuis1Mars + date.jour;
+	var janOuFev = 1 - Math.floor((date.mois + 9)/12);
+	var anneeAjustee = date.annee - janOuFev;
+	var quadriennat = 4 * 365 + 1;
+	var depuis1Mars = Math.ceil((306*(date.mois - 3 + 12*janOuFev)-5)/10);
+	
+	return Math.floor(anneeAjustee/4) * quadriennat + (anneeAjustee % 4) * 365 
+	+ depuis1Mars + date.jour;
 };
 
 // Fonction qui calcule le nombre de jour entre deux dates.
