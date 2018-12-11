@@ -248,16 +248,21 @@ var initTable = function(){
 };
 
 /* Fonction qui retourne un tableau encodé en HTML. Prend en paramètre un 
-tableau d'élément qui seront utilisé pour constituer le tableau. */
+tableau d'élément qui est utilisé pour constituer le tableau. */
 var calendrierHTML = function(table){
 	
-	var contenu = "<table id = "calendrier" onmousedown = "onClick(event)" + "
-	onmouseover = "onMove(event)" " + "data-nbjours =" + nbJours + "
-	data-nbheures = nbHeures>"";
+	var contenu = "<table id = \"calendrier\n" +
+	"onmousedown = \"onClick(event)\"\n onmouseover = \"onMove(event)\n" + 
+	"data-nbjours =" + tabSondage[6] + "\ndata-nbheures =" + tabSondage[7] + ">";
 	
 	// initialise la première ligne
-	<tr>
-		<<th></th>
+
+	for(var i = 0; i < table.length; i++){
+		for(var j = 0; j < table[0].length; j++){
+		
+		
+		}
+	}
 	
 }
 
@@ -268,7 +273,7 @@ var getCalendar = function (sondageId) {
 	var texte = readFile("template/calendar.html");
 	
 	var titre = readFile("template/CSV/" + sondageId + ".csv").split(",")[0];
-	var table = iniTable(); 
+	var table = "hello";//iniTable(); 
 	var url = "http://localhost:1337/" + sondageId;
 	
 	var ancienItem = ["{{titre}}", "{{table}}", "{{url}}"]; 
@@ -281,7 +286,7 @@ var getCalendar = function (sondageId) {
 	
 	// return false si le calendrier n'existe pas
 	
-    return contenu;
+    return texte;
 };
 
 /* Retourne le texte HTML à afficher à l'utilisateur pour voir les résultats de 
