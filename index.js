@@ -1,5 +1,6 @@
 // 14 décembre 2018
 // François-Alexandre Tremblay et Sebastian Dragomirescu
+
 /* Ce programme permet de générer une application web de dans le style du site
 doodle qui permet de planifier des réunions et autres activités aux moments qui
 conviennent le mieux à tous les participants. Le programme interagit avec les
