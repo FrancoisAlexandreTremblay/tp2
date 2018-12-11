@@ -104,6 +104,17 @@ function onClick(event) {
 
     // Attribut id de l'élément sur lequel le clic a été fait
     var id = t.id;
+    
+    // vérifier si t.id se trouve dans la matrice "mat"
+    // &#10003 unicode pour ✓
+    var symbole = "&#10003";
+    var elem = document.getElementById(id)
+    
+    // vérifier si le contenu est vide ou s'il contient déjà un ✓
+    if(elem.innerHTML == "")
+        elem.innerHTML = symbole; // si vide, remplir avec ✓
+    else if(elem.innerHTML == symbole)
+        elem.innerHTML == ""; // s'il contient ✓, vider
 }
 
 function onMove(event) {
