@@ -176,28 +176,28 @@ var modifierTxt = function (texte, mot, autre){
 /* Fonction qui construit des tableaux de jours/mois entre deux dates. 
  ex. tabJourMois(2018-11-12, 2018-11-14) retourne [12 nov, 13 nov, 14 nov] */ 
 var tabJourMois = function (dateDebut, dateFin){
-	
+    
 	var debut = +dateDebut.split("-")[2];
-	var moisDebut = dateDebut.split("-")[1];
+	var moisDebut = mois[dateDebut.split("-")[1] - 1];
 	
 	var fin = +dateFin.split("-")[2];
-	var moisFin = dateFin.split("-")[1];
+	var moisFin = mois[dateFin.split("-")[1] - 1];
 	
 	var ecart = jourEntreDate(dateDebut, dateFin);
 	
-	var resultat = [];
+	var resultatJour=[];
 	
-	for(var i = 0; i <= ecart; i++){ // loop à travers les jours jusqu'à écart
+	for(var i = 0; i <= ecart; i++){
 		
-		if (fin - i > 0){ // si le jour de la date de fin est supérieur à 0...
-			resultat.unshift(fin - i + " " + mois[moisFin - 1]);
-			
-		} else { // sinon, ajoute les jours à partir de la date de début 
-			resultat.unshift(debut + ecart - i + " " + mois[moisDebut- 1]);
+		if (fin - i > 0){
+			resultatJour.unshift(fin - i + " " + moisFin);
+
+		} else {
+			resultatJour.unshift(debut + ecart - i + " " + moisDebut);
 		}
 	}
 	
-	return [resultat];
+	return resultatJour;
 };
 
 var tabHeure = function (heureDebut, heureFin){
@@ -208,6 +208,20 @@ var tabHeure = function (heureDebut, heureFin){
 		resultat.push(i + "h");
 	}
 	return resultat;
+};
+
+/* Fonction qui retourne le tableau des Id ex. ["0-0", "0-1","0-2",...]. Prend 
+en paramètre le nb de lignes et le nb de colonnes. */
+var tabId = function (ligne, colonne){
+	
+	var resultat = [];
+	
+	for(var i = 0; i < ligne; i++){
+		
+		resultat.push(Array(colonne).fill("").map(function (x, j){ 
+			return i + "-" + j++; }));	
+	}
+    return resultat;
 };
 
 // Fonction qui initialise la table de la fonction getCalendar().
@@ -222,8 +236,10 @@ var initTable = function(){
 	// tableau des heures entre heureDébut et heureFin ex: [7h,8h,9h...] 
 	var tabHeures = tabHeure(tabSondage[4], tabSondage[5]);
 	
-	// initialise les cellules du tableau
-	var mat = Array(nbHeures).fill(Array(nbJours).fill(""));
+	// tableau des Id
+	var tabId = tabId(tabHeures.length, tabJours.length);
+	
+	return 
 	
 	// Ajoute les heures glitch 
 	mat.map(function(ligne, i) { 
