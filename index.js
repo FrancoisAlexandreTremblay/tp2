@@ -299,6 +299,7 @@ var caracValide = function(tabCar){
     return true;
 };
 
+
 /* Fonction qui converti une date en nombre de jour. glitch (prendre la 
 fonction du premier exercice). */
 var convDateEnJour = function (date){
