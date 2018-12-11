@@ -242,7 +242,7 @@ var initTable = function(){
 	mat[0][0] = 3; 
 	
 	
-}
+};
 
 /* Retourne le texte HTML à afficher à l'utilisateur pour répondre au
 sondage demandé. Retourne false si le calendrier demandé n'existe pas. */
