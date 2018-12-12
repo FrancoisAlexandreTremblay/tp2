@@ -262,13 +262,13 @@ var calendrierHTML = function(table){
 		for(var j = 0; j < table[0].length; j++){ // colonne du tableau
 		
 			if(i == 0 && j == 0){ // si première cellule du tableau, ajoute rien
-				contenu += "<th></th>";
+				contenu += tag("th", "");
 				
 			} else if(i == 0){ // si première colonne, ajoute attribut th
-				contenu += "<th>" + table[i][j] + "</th>";
+				contenu += tag("th", table[i][j]);
 				
 			} else { // si autre cellue, ajoute attribut 
-				contenu += "<td id=" + table[i][j] + "</td>";
+				contenu += tag("td", "id=" + table[i][j], "");
 			}
 		}
 		
