@@ -150,24 +150,10 @@ var ecrireCSV = function (path, matrice) {
 	writeFile(path, contenu);
 };
 
-
-
-// Fonction qui retourne la position d'un sondage dans le tableau des sondages
-//var positionSondage = function(sondageId){
-	
-//	for(var i = 0; i < tabSondage.length; i++){
-//		if(tabSondage[i][1] == sondageId){ // si le sondage est dans le tableau
-//			return i;
-//		}
-//	}
-//};
-
 // Fonction qui retourne les balises d'un élément en HTML.
 var tag = function(nom, attr, contenu) {
     return "<"+ nom +" " + attr + ">" + contenu + "</" + nom + ">";
 };
-
-
 
 /* Fonction qui modifie des mots dans un texte en les remplaçants par d'autres 
 mots. */ 
@@ -238,13 +224,13 @@ var initTable = function(sondageId){
 	// tableau des heures entre heureDébut et heureFin ex: [7h,8h,9h...] 
 	var tabHeures = tabHeure(+tabTemp[4], +tabTemp[5]);
 	
-	// tableau des h
+	// tableau des heures
 	var tableId = tabId(tabHeures.length - 1, tabJours.length - 1);
 	
 	
  	tableId.unshift(tabJours);// fusionne tabJour au nouveau tableau tabId 
     
-	for(var i = 1; i< tableId.length; i++){
+	for(var i = 1; i < tableId.length; i++){
 		
         tableId[i].unshift(tabHeures[i]);
         tableId[i].pop();
@@ -273,10 +259,9 @@ var initResultats = function(sondageId){
 	}); */
 	
  	tableId.unshift(tabJours);// fusionne tabJour au nouveau tableau tabId 
-    for(var i = 1; i< tableId.length; i++){
-        var temporaire = tabHeures[i];
-        tableId[i].unshift(temporaire);
-        tableId[i].pop();
+	
+    for(var i = 1; i< tableId.length; i++){ //**************************
+        tableId[i].unshift(tabHeures[i]);
     } 
 	return resultatsHTML(tableId);
 };
@@ -442,7 +427,7 @@ true s'il existe. */
 var sondageExiste = function (id){
 	
 	// liste les sondages dans le document
-	var sondage = fs.readdirSync("template/CSV"); 
+	var sondage = fs.readdirSync("template/CSV/" + id); 
 	
 	if(sondage == []) return false; // si le dossier de sondage est vide
 	
@@ -510,9 +495,14 @@ var creerSondage = function(titre, id, dateDebut, dateFin, heureDebut, heureFin)
 	tabSondage = [titre, id, dateDebut, dateFin, heureDebut, heureFin, 
 		ecartJour, ecartHeure];
 		
-	var path = "template/CSV/" + id + ".csv";
+	fs.mkdirSync(id); // crée le dossier du sondage
 	
-	ecrireCSV(path, tabSondage);
+	// path du fichier des informations du sondage et crée le fichier
+	var path = "template/CSV/" + id + "/" + id + ".csv"; 
+	ecrireCSV(path, tabSondage); // crée le fichier
+	
+	path = "template/CSV/" + id + "/" + "participants" + ".csv"
+	
 	
     return true;
 };
@@ -523,7 +513,8 @@ var creerSondage = function(titre, id, dateDebut, dateFin, heureDebut, heureFin)
 //
 // Cette fonction ne retourne rien
 var ajouterParticipant = function(sondageId, nom, disponibilites) {
-    // TODO
+	
+	
 };
 
 // Génère la `i`ème couleur parmi un nombre total `total` au format
