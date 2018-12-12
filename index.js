@@ -239,19 +239,17 @@ var initTable = function(sondageId){
 	var tabHeures = tabHeure(+tabTemp[4], +tabTemp[5]);
 	
 	// tableau des h
-	var tableId = tabId(tabHeures.length-1, tabJours.length);
+	var tableId = tabId(tabHeures.length - 1, tabJours.length - 1);
 	
-	
-/* 	tableId.map(function (x, j){ // fusionne tabId et tabHeure
-		return x.unshift(tabHeure[j]); 
-	}); */
 	
  	tableId.unshift(tabJours);// fusionne tabJour au nouveau tableau tabId 
-    for(var i = 1; i< tableId.length; i++){
-        var temporaire = tabHeures[i];
-        tableId[i].unshift(temporaire);
+    
+	for(var i = 1; i< tableId.length; i++){
+		
+        tableId[i].unshift(tabHeures[i]);
         tableId[i].pop();
     } 
+	
 	return calendrierHTML(tableId);
 };
 
@@ -287,6 +285,7 @@ var initResultats = function(sondageId){
 tableau d'élément qui est utilisé pour constituer le tableau. 
 ----retourne le tab complet*/
 var calendrierHTML = function(table){
+	
     var id = "id=\"calendrier\" ";
     var onMsDwn = "onmousedown=\"onClick(event)\" ";
     var onMsOvr = "onmouseover=\"onMove(event)\" ";
@@ -294,7 +293,8 @@ var calendrierHTML = function(table){
     var dtHrs = "data-nbheures=\"" + (table.length-1) + "\" ";
 
     var entete = "";
-    for(var i = 0; i < table[0].length; i++){
+	
+    for(var i = 0; i < table[0].length; i++){ // ligne des dates
         entete += tag("th","",table[0][i]);
     }
     
@@ -302,10 +302,16 @@ var calendrierHTML = function(table){
     
     var cellules = "";
     var lignes = "";
-    for(var i = 1; i < table.length; i++){
-        for(var j = 0; j <table[i].length; j++){
-            if(j == 0) cellules += tag("th","",table[i][j]);
-            else cellules += tag("td","id=\""+table[i][j]+"\"","");
+	
+    for(var i = 1; i < table.length; i++){ // colonne du tableau
+		
+        for(var j = 0; j <table[i].length; j++){ // ligne du tableau
+			
+            if(j == 0) {
+				cellules += tag("th","",table[i][j]);
+            } else {
+				cellules += tag("td","id=\""+table[i][j]+"\"","");
+			}
         }
         
         lignes += tag("tr","",cellules);
@@ -313,32 +319,6 @@ var calendrierHTML = function(table){
     }
     
     return tag("table", id + onMsDwn + onMsOvr + dtJrs + dtHrs, entete + lignes);
-    
-/*     var contenu = "<table id = \"calendrier onmousedown = \"onClick(event)" +
-	"onmouseover = \"onMove(event) data-nbjours =" + tableTemp[6] + 
-	"data-nbheures =" + tableTemp[7] + ">";
-	
-	// initialise le tableau
-	for(var i = 0; i < table.length; i++){ // ligne du tableau
-		contenu += "<tr>"; // ajoute l'attribut <tr> à chaque nouvelle ligne 
-		
-		for(var j = 0; j < table[0].length; j++){ // colonne du tableau
-		
-			if(i == 0 && j == 0){ // si première cellule du tableau, ajoute rien
-				contenu += tag("th", "");
-				
-			} else if(i == 0){ // si première colonne, ajoute attribut th
-				contenu += tag("th", table[i][j]);
-				
-			} else { // si autre cellue, ajoute attribut 
-				contenu += tag("td", "id=" + table[i][j], "");
-			}
-		}
-		
-		contenu += "</tr>"
-	}
-	
-	contenu +="</table>" */
 };
 
 var resultatsHTML = function(table){
@@ -352,8 +332,10 @@ var resultatsHTML = function(table){
     
     var cellules = "";
     var lignes = "";
+	
     for(var i = 1; i < table.length; i++){
         for(var j = 0; j <table[i].length; j++){
+			
             if(j == 0) cellules += tag("th","",table[i][j]);
             else cellules += tag("td","id=\""+table[i][j]+"\"","");
         }
@@ -408,9 +390,6 @@ var getResults = function (sondageId) {
 	// return false si le calendrier n'existe pas
 	
     return texte;
-    
-    
-
 };
 
 
@@ -436,7 +415,6 @@ var caracValide = function(tabCar){
     
     return true;
 };
-
 
 /* Fonction qui converti une date en nombre de jour. glitch (prendre la 
 fonction du premier exercice). */
@@ -526,23 +504,16 @@ var creerSondage = function(titre, id, dateDebut, dateFin, heureDebut, heureFin)
 	
 	// Cela ne fonctionne pas encore... Il doit y avoir une problème avec le serveur... On devrait appeller la fonction à partir du html !!!  glitch
 	if(msgErreur != ""){ // si une des erreur survient...
-		
-		console.log(msgErreur);
 		texte = texte.split(txtAModifier).join(msgErreur);
-		console.log(texte);
 		return texte;
 	}
 	
-	// Peut-être que la meilleur façon de stocker les participants serait dans 
-	// un tableau plutôt que dans un fichier. Chaque sondage est un élément d'un tableau. Chaque élément contient Dans chaque sondage, il y a les éléments ci-dessous. Dans participant, il pourrait y avoir un autre tableau qui liste les disponibilités des participants. glitch
-	var matrice = [titre, id, dateDebut, dateFin, heureDebut, heureFin, 
-		ecartJour, ecartHeure, "Participants"];
+	tabSondage = [titre, id, dateDebut, dateFin, heureDebut, heureFin, 
+		ecartJour, ecartHeure];
+		
 	var path = "template/CSV/" + id + ".csv";
 	
-	tabSondage = matrice; 
-	console.log(tabSondage);
-	console.log(matrice);
-	ecrireCSV(path, matrice);
+	ecrireCSV(path, id);
 	
     return true;
 };
