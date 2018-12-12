@@ -175,9 +175,6 @@ var compacterDisponibilites = function() {
             disponibilite += elem != "" ? 1 : 0;
         }
     }
-    
-    //console.log(disponibilite);
 
-    
     return disponibilite;
 };

@@ -255,6 +255,34 @@ var initTable = function(sondageId){
 	return calendrierHTML(tableId);
 };
 
+var initResultats = function(sondageId){
+	
+	// tableau des jours entre les deux dates du sondage ex: [17 nov,18 nov,..] 
+    var tabTemp = readFile("template/CSV/" + sondageId + ".csv").split(",");
+	var tabJours = tabJourMois(tabTemp[2], tabTemp[3]);
+
+	tabJours.unshift(""); // ajoute une cellule vide dans tabJour
+	
+	// tableau des heures entre heureDébut et heureFin ex: [7h,8h,9h...] 
+	var tabHeures = tabHeure(+tabTemp[4], +tabTemp[5]);
+	
+	// tableau des h
+	var tableId = tabId(tabHeures.length-1, tabJours.length);
+	
+	
+/* 	tableId.map(function (x, j){ // fusionne tabId et tabHeure
+		return x.unshift(tabHeure[j]); 
+	}); */
+	
+ 	tableId.unshift(tabJours);// fusionne tabJour au nouveau tableau tabId 
+    for(var i = 1; i< tableId.length; i++){
+        var temporaire = tabHeures[i];
+        tableId[i].unshift(temporaire);
+        tableId[i].pop();
+    } 
+	return resultatsHTML(tableId);
+};
+
 /* Fonction qui retourne un tableau encodé en HTML. Prend en paramètre un 
 tableau d'élément qui est utilisé pour constituer le tableau. 
 ----retourne le tab complet*/
@@ -313,6 +341,29 @@ var calendrierHTML = function(table){
 	contenu +="</table>" */
 };
 
+var resultatsHTML = function(table){
+
+    var entete = "";
+    for(var i = 0; i < table[0].length; i++){
+        entete += tag("th","",table[0][i]);
+    }
+    
+    entete = tag("tr","",entete);
+    
+    var cellules = "";
+    var lignes = "";
+    for(var i = 1; i < table.length; i++){
+        for(var j = 0; j <table[i].length; j++){
+            if(j == 0) cellules += tag("th","",table[i][j]);
+            else cellules += tag("td","id=\""+table[i][j]+"\"","");
+        }
+        
+        lignes += tag("tr","",cellules);
+        cellules ="";
+    }
+    
+    return tag("table", "", entete + lignes);
+};
 /* Retourne le texte HTML à afficher à l'utilisateur pour répondre au
 sondage demandé. Retourne false si le calendrier demandé n'existe pas. */
 var getCalendar = function (sondageId) {
@@ -343,7 +394,7 @@ var getResults = function (sondageId) {
 	var texte = readFile("template/results.html");
 	
 	var titre = readFile("template/CSV/" + sondageId + ".csv").split(",")[0];
-	var table = initTable(sondageId);
+	var table = initResultats(sondageId);
 	var url = "http://localhost:1337/" + sondageId + "\/results";
 	
 	var ancienItem = ["{{titre}}", "{{table}}", "{{url}}"]; 
