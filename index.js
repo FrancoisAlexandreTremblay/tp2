@@ -274,6 +274,8 @@ var calendrierHTML = function(table){
 		
 		contenu += "</tr>"
 	}
+	
+	contenu +="</table>"
 };
 
 /* Retourne le texte HTML à afficher à l'utilisateur pour répondre au
