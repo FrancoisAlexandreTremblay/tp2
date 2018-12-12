@@ -308,7 +308,7 @@ var calendrierHTML = function(table){
         for(var j = 0; j <table[i].length; j++){ // ligne du tableau
 			
             if(j == 0) {
-				cellules += tag("th","",table[i][j]);
+				cellules += tag("th","",table[i][j]); // ajoute les jours
             } else {
 				cellules += tag("td","id=\""+table[i][j]+"\"","");
 			}
@@ -391,7 +391,6 @@ var getResults = function (sondageId) {
 	
     return texte;
 };
-
 
 /* Fonction qui évalue si un tableau de caractères respecte les conditions
 (lettres, chiffres et tirets). */
@@ -513,7 +512,7 @@ var creerSondage = function(titre, id, dateDebut, dateFin, heureDebut, heureFin)
 		
 	var path = "template/CSV/" + id + ".csv";
 	
-	ecrireCSV(path, id);
+	ecrireCSV(path, tabSondage);
 	
     return true;
 };
