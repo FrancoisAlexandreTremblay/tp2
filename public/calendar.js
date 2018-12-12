@@ -14,8 +14,8 @@ document.addEventListener('DOMContentLoaded', function() {
 	var nbHeures = cal.dataset.nbheures;
 	var nbJours = cal.dataset.nbjours;
 	
-	cal.addEventListner("onmousedown", onClick);
-	cal.addEventListner("onmouseover", onMove);
+	cal.addEventListener("onmousedown", onClick);
+	cal.addEventListener("onmouseover", onMove);
 
 });
 

@@ -251,24 +251,29 @@ var initTable = function(){
 tableau d'élément qui est utilisé pour constituer le tableau. */
 var calendrierHTML = function(table){
 	
-	var contenu = "<table id = \"calendrier\n" +
-	"onmousedown = \"onClick(event)\"\n onmouseover = \"onMove(event)\n" + 
-	"data-nbjours =" + tabSondage[6] + "\ndata-nbheures =" + tabSondage[7] + 
-	">\n";
+	var contenu = "<table id = \"calendrier onmousedown = \"onClick(event)" +
+	"onmouseover = \"onMove(event) data-nbjours =" + tabSondage[6] + 
+	"data-nbheures =" + tabSondage[7] + ">";
 	
-	// initialise la première ligne
-
-	for(var i = 0; i < table.length; i++){
-		for(var j = 0; j < table[0].length; j++){
+	// initialise le tableau
+	for(var i = 0; i < table.length; i++){ // ligne du tableau
+		contenu += "<tr>"; // ajoute l'attribut <tr> à chaque nouvelle ligne 
 		
-			if(i == 0 && j == ){
-				contenu += 
+		for(var j = 0; j < table[0].length; j++){ // colonne du tableau
+		
+			if(i == 0 && j == 0){ // si première cellule du tableau, ajoute rien
+				contenu += "<th></th>";
+				
+			} else if(i == 0){ // si première colonne, ajoute attribut th
+				contenu += "<th>" + table[i][j] + "</th>";
+				
+			} else { // si autre cellue, ajoute attribut 
+				contenu += "<td id=" + table[i][j] + "</td>";
 			}
-		tag("th", "", ligne + "Nov"); 
-		
 		}
+		
+		contenu += "</tr>"
 	}
-	
 };
 
 /* Retourne le texte HTML à afficher à l'utilisateur pour répondre au
@@ -278,7 +283,7 @@ var getCalendar = function (sondageId) {
 	var texte = readFile("template/calendar.html");
 	
 	var titre = readFile("template/CSV/" + sondageId + ".csv").split(",")[0];
-	var table = iniTable(); 
+	var table = initTable(); 
 	var url = "http://localhost:1337/" + sondageId;
 	
 	var ancienItem = ["{{titre}}", "{{table}}", "{{url}}"]; 
@@ -314,7 +319,7 @@ var caracValide = function(tabCar){
         var car = tabCar[i];
         
         if((car >= "a" && car <= "z") || (car >= "A" && car <= "Z") ||
-           (car >= "1" && car <= "9") || (car == "-") || 
+           (car >= "0" && car <= "9") || (car == "-") || 
            (car >= "À" && car <= "Ö") || (car >= "Ù" && car <= "ö") || 
            (car >= "ù" && car <= "ü")){
             continue;
