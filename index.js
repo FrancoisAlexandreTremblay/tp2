@@ -134,7 +134,7 @@ var getIndex = function (replacements) {
 //		|--- creerSondage()
 //		|--- getCalendar() 
 
-var tabSondage = []; // tableau qui contient les informations des sondages
+var dirSondage = "template/CSV/"; // chemin du folder des sondages
 
 var mois = [
     'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin',
@@ -144,9 +144,9 @@ var mois = [
 var MILLIS_PAR_JOUR = (24 * 60 * 60 * 1000);
 
 // Fonction qui écrit un sondage CSV si le fichier n'existe pas déjà
-var ecrireCSV = function (path, matrice) {
+var ecrireCSV = function (path, tab) {
 	
-	var contenu = matrice.join(",") + "\n";
+	var contenu = tab.join(",") + "\n";
 	writeFile(path, contenu);
 };
 
@@ -216,54 +216,27 @@ var tabId = function (ligne, colonne){
 var initTable = function(sondageId){
 	
 	// tableau des jours entre les deux dates du sondage ex: [17 nov,18 nov,..] 
-    var tabTemp = readFile("template/CSV/" + sondageId + ".csv").split(",");
+    var tabTemp = readFile(dirSondage + sondageId + "/" + sondageId +
+	".csv").split(",");
+	
+	// tableau des jours
 	var tabJours = tabJourMois(tabTemp[2], tabTemp[3]);
-
-	tabJours.unshift(""); // ajoute une cellule vide dans tabJour
 	
 	// tableau des heures entre heureDébut et heureFin ex: [7h,8h,9h...] 
 	var tabHeures = tabHeure(+tabTemp[4], +tabTemp[5]);
 	
-	// tableau des heures
-	var tableId = tabId(tabHeures.length - 1, tabJours.length - 1);
+	// tableau des id
+	var tableId = tabId(tabHeures.length - 1, tabJours.length);
 	
+	tableId.unshift(tabJours);// fusionne tabJour au nouveau tableau tabId 
+	tableId.map(function (x, j){ // fusionne nouveau tabId et tabHeure
+			return x.unshift(tabHeures[j]); 
+		});
+	//for(var i = 1; i < tableId.length; i++){
+    //    tableId[i].unshift(tabHeures[i]);
+    //} 
 	
- 	tableId.unshift(tabJours);// fusionne tabJour au nouveau tableau tabId 
-    
-	for(var i = 1; i < tableId.length; i++){
-		
-        tableId[i].unshift(tabHeures[i]);
-        tableId[i].pop();
-    } 
-	
-	return calendrierHTML(tableId);
-};
-
-var initResultats = function(sondageId){
-	
-	// tableau des jours entre les deux dates du sondage ex: [17 nov,18 nov,..] 
-    var tabTemp = readFile("template/CSV/" + sondageId + ".csv").split(",");
-	var tabJours = tabJourMois(tabTemp[2], tabTemp[3]);
-
-	tabJours.unshift(""); // ajoute une cellule vide dans tabJour
-	
-	// tableau des heures entre heureDébut et heureFin ex: [7h,8h,9h...] 
-	var tabHeures = tabHeure(+tabTemp[4], +tabTemp[5]);
-	
-	// tableau des h
-	var tableId = tabId(tabHeures.length-1, tabJours.length);
-	
-	
-/* 	tableId.map(function (x, j){ // fusionne tabId et tabHeure
-		return x.unshift(tabHeure[j]); 
-	}); */
-	
- 	tableId.unshift(tabJours);// fusionne tabJour au nouveau tableau tabId 
-	
-    for(var i = 1; i< tableId.length; i++){ //**************************
-        tableId[i].unshift(tabHeures[i]);
-    } 
-	return resultatsHTML(tableId);
+	return tableId;
 };
 
 /* Fonction qui retourne un tableau encodé en HTML. Prend en paramètre un 
@@ -331,14 +304,15 @@ var resultatsHTML = function(table){
     
     return tag("table", "", entete + lignes);
 };
+
 /* Retourne le texte HTML à afficher à l'utilisateur pour répondre au
 sondage demandé. Retourne false si le calendrier demandé n'existe pas. */
 var getCalendar = function (sondageId) {
 	
 	var texte = readFile("template/calendar.html");
-	
-	var titre = readFile("template/CSV/" + sondageId + ".csv").split(",")[0];
-	var table = initTable(sondageId);
+	var titre = readFile(dirSondage + sondageId + "/" + sondageId +
+	".csv").split(",")[0];
+	var table = calendrierHTML(initTable(sondageId));
 	var url = "http://localhost:1337/" + sondageId;
 	
 	var ancienItem = ["{{titre}}", "{{table}}", "{{url}}"]; 
@@ -359,8 +333,8 @@ sondage demandé. Retourne false si le calendrier demandé n'existe pas. */
 var getResults = function (sondageId) {
     
 	var texte = readFile("template/results.html");
-	
-	var titre = readFile("template/CSV/" + sondageId + ".csv").split(",")[0];
+	var titre = readFile(dirSondage + sondageId + "/" + sondageId +
+	".csv").split(",")[0];
 	var table = initResultats(sondageId);
 	var url = "http://localhost:1337/" + sondageId + "\/results";
 	
@@ -421,18 +395,17 @@ var jourEntreDate = function(dateDebut, dateFin){
     return convDateEnJour(dateFin) - convDateEnJour(dateDebut);
 };
 
-/* Fonction qui vérifie si le sondage (id) a déjà été enregistré par un 
-utilisateur dans le document CSV. Retourne false si le sondage n'existe pas et 
-true s'il existe. */
+/* Fonction qui vérifie si le directory du sondage (id) existe déjà. Retourne 
+false si le sondage n'existe pas et true s'il existe. */
 var sondageExiste = function (id){
 	
 	// liste les sondages dans le document
-	var sondage = fs.readdirSync("template/CSV/" + id); 
+	var sondage = fs.readdirSync(dirSondage); 
 	
-	if(sondage == []) return false; // si le dossier de sondage est vide
-	
+	if(sondage == "") return false;
+
 	for(var i = 0; i < sondage.length; i++){
-		if(sondage[i] == (id + ".csv")){ // si le sondage est dans le dossier
+		if(sondage[i] == id){ // si le sondage est dans le dossier
 			return true;
 		}
 	}
@@ -480,7 +453,7 @@ var creerSondage = function(titre, id, dateDebut, dateFin, heureDebut, heureFin)
 		" l\’heure de début.");	
   	}
 	
-	// Si sondage existe, retourne msg d'erreur et false.
+	// Si sondage existe dans le folder, retourne msg d'erreur et false.
 	if(sondageExiste(id)){
 		msgErreur = msgErreur.concat("Erreur: L\’identifiant de sondage " +
 		"correspond à un sondage existant.");
@@ -492,26 +465,29 @@ var creerSondage = function(titre, id, dateDebut, dateFin, heureDebut, heureFin)
 		return texte;
 	}
 	
-	tabSondage = [titre, id, dateDebut, dateFin, heureDebut, heureFin, 
+	var tabSondage = [titre, id, dateDebut, dateFin, heureDebut, heureFin, 
 		ecartJour, ecartHeure];
 		
-	fs.mkdirSync(id); // crée le dossier du sondage
+	fs.mkdirSync(dirSondage + id); // crée le dossier du sondage
 	
-	// path du fichier des informations du sondage et crée le fichier
-	var path = "template/CSV/" + id + "/" + id + ".csv"; 
-	ecrireCSV(path, tabSondage); // crée le fichier
+	console.log(dirSondage + id);
 	
-	path = "template/CSV/" + id + "/" + "participants" + ".csv"
+	// CSV des informations sur le sondage
+	var path = dirSondage + id + "/" + id + ".csv"; 
+	ecrireCSV(path, tabSondage);
+	
+	// CSV des participants
+	var path = dirSondage + id + "/" + "participants" + ".csv"
+	ecrireCSV(path, [""]);
 	
 	
     return true;
 };
 
-// Ajoute un participant et ses disponibilités aux résultats d'un
-// sondage. Les disponibilités sont envoyées au format textuel
-// fourni par la fonction compacterDisponibilites() de public/calendar.js
-//
-// Cette fonction ne retourne rien
+/* Fonction qui ajoute un participant et ses disponibilités aux résultats du 
+aux résultats du sondage dans le CSV des participants. Les disponibilités sont 
+envoyées au format textuel fourni par la fonction compacterDisponibilites() de 
+public/calendar.js. La fonction ne retourne rien. */
 var ajouterParticipant = function(sondageId, nom, disponibilites) {
 	
 	
