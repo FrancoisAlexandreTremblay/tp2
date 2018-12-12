@@ -490,6 +490,15 @@ envoyées au format textuel fourni par la fonction compacterDisponibilites() de
 public/calendar.js. La fonction ne retourne rien. */
 var ajouterParticipant = function(sondageId, nom, disponibilites) {
 	
+	var participants = readFile(dirSondage + sondageId + "/" + sondageId +
+	".csv").split(",");
+	
+	//for()
+	//if(participants[0] == nom){
+	//	return;
+		//} else {
+	//	participant
+	//}
 	
 };
 
