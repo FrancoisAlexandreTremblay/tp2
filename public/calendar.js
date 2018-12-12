@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 
-	var mat = Array(nbHeures + 1).fill(Array(nbJours).fill(0));
+/*	var mat = Array(nbHeures + 1).fill(Array(nbJours).fill(0));
 
 <table id = "calendrier" 
 	onmousedown = "onClick(event)"
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	</tr>
 	
 	</table>
-	
+
 
 	var cadreDuJeu = function (mat) {
 
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	    }).join(""));
 
 	};
-});
+});*/
 
 function onClick(event) {
     // TODO
@@ -101,27 +101,55 @@ function onClick(event) {
        fait. Notez qu'il ne s'agit pas forcément d'une case <td> du
        tableau */
     var t = event.target;
-
     // Attribut id de l'élément sur lequel le clic a été fait
     var id = t.id;
-    
     // vérifier si t.id se trouve dans la matrice "mat"
     // &#10003 unicode pour ✓
     var symbole = "&#10003";
-    var elem = document.getElementById(id)
+    var elem = document.getElementById(id);
+    //elem = "";
+    console.log(event);
+    console.log(elem.innerHTML);
     
     // vérifier si le contenu est vide ou s'il contient déjà un ✓
-    if(elem.innerHTML == "")
-        elem.innerHTML = symbole; // si vide, remplir avec ✓
-    else if(elem.innerHTML == symbole)
-        elem.innerHTML == ""; // s'il contient ✓, vider
+    if(elem.innerHTML == ""){
+        console.log("if empty elem.innerHTML =" + elem.innerHTML);
+        elem.innerHTML = symbole; 
+    }// si vide, remplir avec ✓
+    
+    else if(elem.innerHTML == "✓"){
+        console.log("if empty not elem.innerHTML =" + elem.innerHTML);
+        elem.innerHTML = "";
+    } // s'il contient ✓, vider 
+    console.log("after if");
+    console.log(elem.innerHTML == "✓");
+    
 }
-
 function onMove(event) {
     // TODO
-
+    if(event.buttons == 0) return;
     var t = event.target;
     var id = t.id;
+    
+    var symbole = "&#10003";
+    var elem = document.getElementById(id);
+    //elem = "";
+    
+    console.log(elem.innerHTML);
+    
+    // vérifier si le contenu est vide ou s'il contient déjà un ✓
+    if(elem.innerHTML == ""){
+        console.log("if empty elem.innerHTML =" + elem.innerHTML);
+        elem.innerHTML = symbole; 
+    }// si vide, remplir avec ✓
+    
+    else if(elem.innerHTML == "✓"){
+        console.log("if empty not elem.innerHTML =" + elem.innerHTML);
+        elem.innerHTML = "";
+    } // s'il contient ✓, vider 
+    console.log("after if");
+    console.log(elem.innerHTML == "✓");
+    
 }
 
 // Fonction qui retourne l'encodage des dispnibilités des participants

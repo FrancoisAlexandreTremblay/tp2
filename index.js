@@ -167,6 +167,8 @@ var tag = function(nom, attr, contenu) {
     return "<"+ nom +" " + attr + ">" + contenu + "</" + nom + ">";
 };
 
+
+
 /* Fonction qui modifie des mots dans un texte en les remplaçants par d'autres 
 mots. */ 
 var modifierTxt = function (texte, mot, autre){
@@ -202,7 +204,7 @@ var tabJourMois = function (dateDebut, dateFin){
 
 var tabHeure = function (heureDebut, heureFin){
 	
-	var resultat= [];
+	var resultat= [""];
 	
 	for(var i = heureDebut; i <= heureFin; i++){
 		resultat.push(i + "h");
@@ -225,35 +227,67 @@ var tabId = function (ligne, colonne){
 };
 
 // Fonction qui initialise la table de la fonction getCalendar().
-var initTable = function(){
+var initTable = function(sondageId){
 	
 	// tableau des jours entre les deux dates du sondage ex: [17 nov,18 nov,..] 
-	var tabJours = tabJourMois(tabSondage[2], tabSondage[3]);
-	tabJour.unshift(""); // ajoute une cellule vide dans tabJour
+    var tabTemp = readFile("template/CSV/" + sondageId + ".csv").split(",");
+	var tabJours = tabJourMois(tabTemp[2], tabTemp[3]);
+
+	tabJours.unshift(""); // ajoute une cellule vide dans tabJour
 	
 	// tableau des heures entre heureDébut et heureFin ex: [7h,8h,9h...] 
-	var tabHeures = tabHeure(tabSondage[4], tabSondage[5]);
+	var tabHeures = tabHeure(+tabTemp[4], +tabTemp[5]);
 	
-	// tableau des Id
-	var tabId = tabId(tabHeures.length, tabJours.length);
+	// tableau des h
+	var tableId = tabId(tabHeures.length-1, tabJours.length);
 	
 	
-	tabId.map(function (x, j){ // fusionne tabId et tabHeure
+/* 	tableId.map(function (x, j){ // fusionne tabId et tabHeure
 		return x.unshift(tabHeure[j]); 
-	});
+	}); */
 	
-	tabId.unshift(tabJour);// fusionne tabJour au nouveau tableau tabId 
-	
-	return tabId; 
+ 	tableId.unshift(tabJours);// fusionne tabJour au nouveau tableau tabId 
+    for(var i = 1; i< tableId.length; i++){
+        var temporaire = tabHeures[i];
+        tableId[i][0] = temporaire;
+    } 
+	return calendrierHTML(tableId);
 };
 
 /* Fonction qui retourne un tableau encodé en HTML. Prend en paramètre un 
-tableau d'élément qui est utilisé pour constituer le tableau. */
+tableau d'élément qui est utilisé pour constituer le tableau. 
+----retourne le tab complet*/
 var calendrierHTML = function(table){
-	
-	var contenu = "<table id = \"calendrier onmousedown = \"onClick(event)" +
-	"onmouseover = \"onMove(event) data-nbjours =" + tabSondage[6] + 
-	"data-nbheures =" + tabSondage[7] + ">";
+    var id = "id=\"calendrier\" ";
+    var onMsDwn = "onmousedown=\"onClick(event)\" ";
+    var onMsOvr = "onmouseover=\"onMove(event)\" ";
+    var dtJrs = "data-nbjours=\"" + (table[0].length-1) + "\" ";
+    var dtHrs = "data-nbheures=\"" + (table.length-1) + "\" ";
+
+    var entete = "";
+    for(var i = 0; i < table[0].length; i++){
+        entete += tag("th","",table[0][i]);
+    }
+    
+    entete = tag("tr","",entete);
+    
+    var cellules = "";
+    var lignes = "";
+    for(var i = 1; i < table.length; i++){
+        for(var j = 0; j <table[i].length; j++){
+            if(j == 0) cellules += tag("th","",table[i][j]);
+            else cellules += tag("td","id=\""+table[i][j]+"\"","");
+        }
+        
+        lignes += tag("tr","",cellules);
+        cellules ="";
+    }
+    
+    return tag("table", id + onMsDwn + onMsOvr + dtJrs + dtHrs, entete + lignes);
+    
+/*     var contenu = "<table id = \"calendrier onmousedown = \"onClick(event)" +
+	"onmouseover = \"onMove(event) data-nbjours =" + tableTemp[6] + 
+	"data-nbheures =" + tableTemp[7] + ">";
 	
 	// initialise le tableau
 	for(var i = 0; i < table.length; i++){ // ligne du tableau
@@ -275,7 +309,7 @@ var calendrierHTML = function(table){
 		contenu += "</tr>"
 	}
 	
-	contenu +="</table>"
+	contenu +="</table>" */
 };
 
 /* Retourne le texte HTML à afficher à l'utilisateur pour répondre au
@@ -285,7 +319,7 @@ var getCalendar = function (sondageId) {
 	var texte = readFile("template/calendar.html");
 	
 	var titre = readFile("template/CSV/" + sondageId + ".csv").split(",")[0];
-	var table = initTable(); 
+	var table = initTable(sondageId);
 	var url = "http://localhost:1337/" + sondageId;
 	
 	var ancienItem = ["{{titre}}", "{{table}}", "{{url}}"]; 
@@ -436,7 +470,8 @@ var creerSondage = function(titre, id, dateDebut, dateFin, heureDebut, heureFin)
 	var path = "template/CSV/" + id + ".csv";
 	
 	tabSondage = matrice; 
-	
+	console.log(tabSondage);
+	console.log(matrice);
 	ecrireCSV(path, matrice);
 	
     return true;
