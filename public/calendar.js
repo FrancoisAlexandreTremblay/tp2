@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function onClick(event) {
     // TODO
-
+    //console.log(compacterDisponibilites());
     /* La variable t contient l'élément HTML sur lequel le clic a été
        fait. Notez qu'il ne s'agit pas forcément d'une case <td> du
        tableau */
@@ -107,56 +107,77 @@ function onClick(event) {
     // &#10003 unicode pour ✓
     var symbole = "&#10003";
     var elem = document.getElementById(id);
-    //elem = "";
-    console.log(event);
-    console.log(elem.innerHTML);
-    
+
     // vérifier si le contenu est vide ou s'il contient déjà un ✓
     if(elem.innerHTML == ""){
-        console.log("if empty elem.innerHTML =" + elem.innerHTML);
+
         elem.innerHTML = symbole; 
     }// si vide, remplir avec ✓
     
     else if(elem.innerHTML == "✓"){
-        console.log("if empty not elem.innerHTML =" + elem.innerHTML);
+
         elem.innerHTML = "";
     } // s'il contient ✓, vider 
-    console.log("after if");
-    console.log(elem.innerHTML == "✓");
     
 }
+
 function onMove(event) {
     // TODO
-    if(event.buttons == 0) return;
+    //s'assurer que un boutton de souris est appuyé, sinon quitter
+    if(event.buttons == 0) return; 
+    
     var t = event.target;
     var id = t.id;
     
     var symbole = "&#10003";
     var elem = document.getElementById(id);
-    //elem = "";
-    
-    console.log(elem.innerHTML);
-    
+
     // vérifier si le contenu est vide ou s'il contient déjà un ✓
     if(elem.innerHTML == ""){
-        console.log("if empty elem.innerHTML =" + elem.innerHTML);
+
         elem.innerHTML = symbole; 
     }// si vide, remplir avec ✓
     
     else if(elem.innerHTML == "✓"){
-        console.log("if empty not elem.innerHTML =" + elem.innerHTML);
+
         elem.innerHTML = "";
     } // s'il contient ✓, vider 
-    console.log("after if");
-    console.log(elem.innerHTML == "✓");
+
     
 }
+/* Fonction qui retourne le tableau des Id ex. ["0-0", "0-1","0-2",...]. Prend 
+en paramètre le nb de lignes et le nb de colonnes. */
+var tabId = function (ligne, colonne){
+	
+	var resultat = [];
+	
+	for(var i = 0; i < ligne; i++){
+		
+		resultat.push(Array(colonne).fill("").map(function (x, j){ 
+			return i + "-" + j++; }));	
+	}
+    return resultat;
+};
 
 // Fonction qui retourne l'encodage des dispnibilités des participants
 var compacterDisponibilites = function() {
+    var nom = document.getElementById("nom").value;
+    console.log(nom);
+    var cal = document.getElementById("calendrier")
+    var nbHr = cal.dataset.nbheures;
+    var nbJr = cal.dataset.nbjours;
     
-	//for(var i = 0)
-	//for(var j = 0)
+    var disponibilite = "";
+    
+    for(var i = 0; i < nbHr; i++){
+        for(var j = 0; j < nbJr; j++){
+            var elem = document.getElementById(""+i+"-"+j).innerHTML;
+            disponibilite += elem != "" ? 1 : 0;
+        }
+    }
+    
+    //console.log(disponibilite);
 
-    return '0000000';
+    
+    return disponibilite;
 };

@@ -249,7 +249,8 @@ var initTable = function(sondageId){
  	tableId.unshift(tabJours);// fusionne tabJour au nouveau tableau tabId 
     for(var i = 1; i< tableId.length; i++){
         var temporaire = tabHeures[i];
-        tableId[i][0] = temporaire;
+        tableId[i].unshift(temporaire);
+        tableId[i].pop();
     } 
 	return calendrierHTML(tableId);
 };
@@ -339,8 +340,26 @@ var getCalendar = function (sondageId) {
 sondage demandé. Retourne false si le calendrier demandé n'existe pas. */
 var getResults = function (sondageId) {
     
+	var texte = readFile("template/results.html");
 	
-    return 'Resultats du sondage <b>' + SondageId + '</b> (TODO)';
+	var titre = readFile("template/CSV/" + sondageId + ".csv").split(",")[0];
+	var table = initTable(sondageId);
+	var url = "http://localhost:1337/" + sondageId + "\/results";
+	
+	var ancienItem = ["{{titre}}", "{{table}}", "{{url}}"]; 
+	var nouvelItem = [titre, table, url];
+	
+	//remplacer les anciens items du fichier par les nouveaux items
+	for(var i = 0; i < nouvelItem.length; i++){
+		texte = modifierTxt(texte, ancienItem[i], nouvelItem[i]);
+	}
+	
+	// return false si le calendrier n'existe pas
+	
+    return texte;
+    
+    
+
 };
 
 
