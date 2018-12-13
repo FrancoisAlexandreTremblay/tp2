@@ -222,7 +222,7 @@ var tabId = function (ligne, colonne){
 var initTable = function(sondageId){
 	
 	// tableau des jours entre les deux dates du sondage ex: [17 nov,18 nov,..] 
-    var tabTemp = readFile(dirSondage + sondageId + "/" + sondageId +
+	var tabTemp = readFile(dirSondage + sondageId + "/" + sondageId +
 	".csv").split(",");
 	
 	// tableau des jours
@@ -239,8 +239,8 @@ var initTable = function(sondageId){
 			return x.unshift(tabHeures[j]); 
 		});
 	//for(var i = 1; i < tableId.length; i++){
-    //    tableId[i].unshift(tabHeures[i]);
-    //} 
+	//    tableId[i].unshift(tabHeures[i]);
+	//} 
 	
 	return tableId;
 };
@@ -249,39 +249,39 @@ var initTable = function(sondageId){
 tableau d'élément qui est utilisé pour constituer le tableau. */
 var calendrierHTML = function(table){
 	
-    var id = "id=\"calendrier\" ";
-    var onMsDwn = "onmousedown=\"onClick(event)\" ";
-    var onMsOvr = "onmouseover=\"onMove(event)\" ";
-    var dtJrs = "data-nbjours=\"" + (table[0].length-1) + "\" ";
-    var dtHrs = "data-nbheures=\"" + (table.length-1) + "\" ";
+	var id = "id=\"calendrier\" ";
+	var onMsDwn = "onmousedown=\"onClick(event)\" ";
+	var onMsOvr = "onmouseover=\"onMove(event)\" ";
+	var dtJrs = "data-nbjours=\"" + (table[0].length-1) + "\" ";
+	var dtHrs = "data-nbheures=\"" + (table.length-1) + "\" ";
 
-    var entete = "";
+	var entete = "";
 	
-    for(var i = 0; i < table[0].length; i++){ // ligne des dates
-        entete += tag("th","",table[0][i]);
-    }
-    
-    entete = tag("tr","",entete);
-    
-    var cellules = "";
-    var lignes = "";
+	for(var i = 0; i < table[0].length; i++){ // ligne des dates
+		entete += tag("th","",table[0][i]);
+	}
 	
-    for(var i = 1; i < table.length; i++){ // colonne du tableau
+	entete = tag("tr","",entete);
+	
+	var cellules = "";
+	var lignes = "";
+	
+	for(var i = 1; i < table.length; i++){ // colonne du tableau
 		
-        for(var j = 0; j <table[i].length; j++){ // ligne du tableau
+		for(var j = 0; j <table[i].length; j++){ // ligne du tableau
 			
-            if(j == 0) {
+			if(j == 0) {
 				cellules += tag("th","",table[i][j]); // ajoute les jours
-            } else {
+			} else {
 				cellules += tag("td","id=\""+table[i][j]+"\"","");
 			}
-        }
-        
-        lignes += tag("tr","",cellules);
-        cellules ="";
-    }
-    
-    return tag("table", id + onMsDwn + onMsOvr + dtJrs + dtHrs, entete + lignes);
+		}
+		
+		lignes += tag("tr","",cellules);
+		cellules ="";
+	}
+	
+	return tag("table", id + onMsDwn + onMsOvr + dtJrs + dtHrs, entete + lignes);
 };
 
 /* Retourne le texte HTML à afficher à l'utilisateur pour répondre au
@@ -357,9 +357,7 @@ var resultatsHTML = function(table, sondageId){
 	// entrer chaque participant sur son propre tableau du format [,nom, dispo]
 	participants = participants.map(function(x){return x.split(",");});
 
-	console.log("rHTML participants ");
-	console.log(participants);
-	
+
 	// variable pour collecter et faciliter le travaille sur les disponibilités 
 	var tabDispo = [];
 
@@ -367,18 +365,12 @@ var resultatsHTML = function(table, sondageId){
 		tabDispo.push(participants[i][2].split(""));
 	}
 
-	console.log(tabDispo);
-
-
 	// variable qui enregistre le total de disponibilités pour chaque case
 	var dipoEnesemble = dispoStats(tabDispo);
-	console.log("dispoendemble");
-	console.log(dipoEnesemble);
 
 	//variable pour garder en mémoire la meilleure et la pire dispo
 	var minEtMax = minMax(dipoEnesemble);
-	console.log("minmax");
-	console.log(minEtMax);
+
 	
 	// préparer les variable de style CSS
 	var max = "class = \"max\"";
@@ -403,7 +395,7 @@ var resultatsHTML = function(table, sondageId){
 
 	var cellules = ""; //variable pour enregister l<HTML des cellules
 	var lignes = ""; //variable pour enregister l<HTML des rangees
-	var n = -2; //variable utilisé pour décaler la position des 
+	var n = -2; //variable utilisée pour décaler la position des 
 	//disponibilités par rapport aux boucles
 
 	for(var i = 1; i < table.length; i++){//parcure l'hauteur du tableau
@@ -422,6 +414,8 @@ var resultatsHTML = function(table, sondageId){
 							accBarres += tag("span",tabStyles[k],".");
 						}
 					}
+				// les if suivants véfifient les max/min des disponibilités et
+				// assigne le style correpondant
 				if(dipoEnesemble[i+j+n] == minEtMax[0]){
 
 					cellules += tag("td", min,accBarres, "");
@@ -435,13 +429,12 @@ var resultatsHTML = function(table, sondageId){
 					cellules += tag("td", "",accBarres, "");
 				}
 					accBarres="";
-				console.log(i+j+n);
 			} // fermer else pas de TH
 		}
 
 		lignes += tag("tr","",cellules);
 		cellules ="";
-		n += table[0].length-2;
+		n += table[0].length-2; //décalage selon le nombre de jours à ch. iter.
 	}
 
 	return tag("table", "", entete + lignes);
@@ -450,7 +443,7 @@ var resultatsHTML = function(table, sondageId){
 /* Retourne le texte HTML à afficher à l'utilisateur pour voir les résultats de 
 sondage demandé. Retourne false si le calendrier demandé n'existe pas. */
 var getResults = function (sondageId) {
-    
+	
 	var texte = readFile("template/results.html");
 	
 	var titre = readFile(dirSondage + sondageId + "/" + sondageId +
@@ -460,22 +453,20 @@ var getResults = function (sondageId) {
 		"participants.csv").split("\n");
 
 	// entrer chaque participant sur son propre tableau du format [,nom, dispo]
-    participants = participants.map(function(x){return x.split(",");});
-    
+	participants = participants.map(function(x){return x.split(",");});
 
-    
 	var table = resultatsHTML(initTable(sondageId), sondageId);
 
 	var url = "http://localhost:1337/" + sondageId ;	var legende ="";
-    var ligneLeg = "";
-    for(var i = 0; i< participants.length-1; i++){
-        
-        ligneLeg += tag("li","style=\"background-color:"+
-            genColor(i,participants.length-1)+"\"",participants[i][1]);
-    }
+	var ligneLeg = "";
+	for(var i = 0; i< participants.length-1; i++){
+		
+		ligneLeg += tag("li","style=\"background-color:"+
+			genColor(i,participants.length-1)+"\"",participants[i][1]);
+	}
 
 
-    legende = tag("ul","",ligneLeg);
+	legende = tag("ul","",ligneLeg);
 	var ancienItem = ["{{titre}}", "{{table}}", "{{url}}", "{{legende}}"]; 
 
 	var nouvelItem = [titre, table, url, legende];
@@ -487,7 +478,7 @@ var getResults = function (sondageId) {
 	
 	// return false si le calendrier n'existe pas
 	
-    return texte;
+	return texte;
 };
 
 /* Fonction qui évalue si un tableau de caractères respecte les conditions
