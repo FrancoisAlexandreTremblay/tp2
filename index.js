@@ -309,27 +309,77 @@ var getCalendar = function (sondageId) {
 
 /* Fonction qui retourne le tableau résultat encodé en HTML. Prend en paramètre 
 un tableau d'élément qui est utilisé pour constituer le tableau. */
-var resultatHTML = function(table){
+var resultatsHTML = function(table, sondageId){
+    
+	// variable pour enregister les données du fichier CSV de participants
+	var participants = readFile(dirSondage + sondageId + "/" + 
+		"participants.csv").split("\n");
 
+	// entrer chaque participant sur son propre tableau du format [,nom, dispo]
+    participants = participants.map(function(x){return x.split(",");});
+
+    console.log("rHTML participants ");
+    console.log(participants);
+	
+	// variable pour collecter et faciliter le travaille sur les disponibilités 
+    var tabDispo = [];
+    
+    for(var i = 0; i<participants.length-1;i++){
+        tabDispo.push(participants[i][2].split(""));
+    }
+    
+    console.log(tabDispo);
+	
+	// préparer les variable de style CSS
+    var max = "class = \"max\"";
+    var min = "class = \"min\"";
+    
+    // variable qui ramasse les styles pour chaque participant dans un tableau
+    var tabStyles = [];
+    for(var i = 0; i < tabDispo.length; i++){
+        var couleur = genColor(i,tabDispo.length);
+		tabStyles.push("style =\"background-color:" + couleur +
+			"; color: "+ couleur + "\"");
+    }
+
+	// variable pour collecter l'HTML de l'entête du tableau de résultats
     var entete = "";
+	
     for(var i = 0; i < table[0].length; i++){
         entete += tag("th","",table[0][i]);
     }
-    
+    // les dates du tableau
     entete = tag("tr","",entete);
     
-    var cellules = "";
-    var lignes = "";
-	
-    for(var i = 1; i < table.length; i++){
-        for(var j = 0; j <table[i].length; j++){
+    var cellules = ""; //variable pour enregister l<HTML des cellules
+    var lignes = ""; //variable pour enregister l<HTML des rangees
+	var n = -2; //variable utilisé pour décaler la position des 
+    //disponibilités par rapport aux boucles
+    
+    for(var i = 1; i < table.length; i++){//parcure l'hauteur du tableau
+        
+        for(var j = 0; j <table[i].length; j++){//parcure la largeur du tableau
 			
             if(j == 0) cellules += tag("th","",table[i][j]);
-            else cellules += tag("td","id=\""+table[i][j]+"\"","");
+            else {
+                
+                var accBarres=""; //variable pour accumuler les syles si dispo
+                
+                //boucle pour vérifier les dispo à la cellule currante
+                for(var k = 0; k< tabDispo.length; k++){
+                    
+                        if(tabDispo[k][i+j+n] == 1){
+                            accBarres += tag("span",tabStyles[k],".");
+                        }
+                    }
+                cellules += tag("td", max,accBarres, "");
+                accBarres="";
+            }
         }
         
         lignes += tag("tr","",cellules);
         cellules ="";
+        n += 2;
     }
     
     return tag("table", "", entete + lignes);
@@ -340,13 +390,33 @@ sondage demandé. Retourne false si le calendrier demandé n'existe pas. */
 var getResults = function (sondageId) {
     
 	var texte = readFile("template/results.html");
+	
 	var titre = readFile(dirSondage + sondageId + "/" + sondageId +
 	".csv").split(",")[0];
-	var table = resultatHTML(initTable(sondageId));
-	var url = "http://localhost:1337/" + sondageId + "\/results";
 	
-	var ancienItem = ["{{titre}}", "{{table}}", "{{url}}"]; 
-	var nouvelItem = [titre, table, url];
+	var participants = readFile(dirSondage + sondageId + "/" + 
+		"participants.csv").split("\n");
+
+	// entrer chaque participant sur son propre tableau du format [,nom, dispo]
+    participants = participants.map(function(x){return x.split(",");});
+    
+
+    
+	var table = resultatsHTML(initTable(sondageId), sondageId);
+
+	var url = "http://localhost:1337/" + sondageId ;	var legende ="";
+    var ligneLeg = "";
+    for(var i = 0; i< participants.length-1; i++){
+        
+        ligneLeg += tag("li","style=\"background-color:"+
+            genColor(i,participants.length-1)+"\"",participants[i][1]);
+    }
+
+
+    legende = tag("ul","",ligneLeg);
+	var ancienItem = ["{{titre}}", "{{table}}", "{{url}}", "{{legende}}"]; 
+
+	var nouvelItem = [titre, table, url, legende];
 	
 	//remplacer les anciens items du fichier par les nouveaux items
 	for(var i = 0; i < nouvelItem.length; i++){
@@ -506,6 +576,14 @@ var ajouterParticipant = function(sondageId, nom, disponibilites) {
 	ecrireCSV(dirSondage + sondageId + "/participants" + ".csv", participants);
 };
 
+// Fonction qui conferti un numéro de numérotation décimale en hexadecimale,
+// utilisée dans la fonction genColor
+var convHex = function(nb){
+	var nbHex = nb.toString(16);
+		if (nbHex.length % 2) nbHex = '0' + nbHex;
+	return nbHex;
+};
+
 // Génère la `i`ème couleur parmi un nombre total `total` au format
 // hexadécimal HTML
 //
@@ -514,9 +592,28 @@ var ajouterParticipant = function(sondageId, nom, disponibilites) {
 // commence en rouge, qui passe par toutes les autres couleurs et qui
 // revient à rouge.
 var genColor = function(i, nbTotal) {
-    // TODO
-    return '#000000';
+
+	var teinte = (i/nbTotal)*360;
+
+	var c = 0.7;
+	var h = teinte/60;
+	
+	var x = convHex(Math.floor(255*c*(1-(Math.abs(h%2-1)))));
+	var c = convHex(Math.floor(c * 255));
+
+	switch(Math.floor(h)){
+		case 0: return "#" + c + x + "00";
+		case 1: return "#" + x + c + "00";
+		case 2: return "#" + "00" + c + x;
+		case 3: return "#" + "00" + x + c;
+		case 4: return "#" + x + "00" + c;
+		case 5: return "#" + c + "00" + x;
+		default: return "#000000";
+	}
+
 };
+
+
 
 
 /*
