@@ -420,22 +420,17 @@ var sondageExiste = function (id){
 	return false; 
 };
 
-/* Fonction qui crée un sondage à partir des informations entrées. Retourne false 
-si les informations ne sont pas valides et true si elles sont valides. Vérifie diverses
-conditions (ex. Id contient uniquement des lettres, chiffres ou tirets, dateDebut est 
-inférieur à dateFin, heureDebut est inférieur à heureFin, le nombre de jour du sondage
-n'excède pas 30 jours. */
-var creerSondage = function(titre, id, dateDebut, dateFin, heureDebut, heureFin) {
-    
-	
+/* Fonction qui vérifie que les conditions du sondage sont respectées. Retourne
+false si les conditions ne sont pas respectées. Sinon, retourne true. */
+var conditionInfo = function (id, dateDebut, dateFin, heureDebut, heureFin){
+
 	// nombre de jour entre dateDebut et dateFin
     var ecartJour = jourEntreDate(dateDebut, dateFin);
     var ecartHeure = heureFin - heureDebut;
+	var txtAModifier = ["<script src=\"index.js\"></script>"];
 	
-	var texte = readFile("template/index.html");
-	var txtAModifier = ["Erreur : assurez-vous d'entrer des données valides."];
 	var msgErreur = [];
-	
+
 	// Si le id ne contient pas des caractères valides, retourne false. 
     if(!caracValide(id.split("")) || id == "") {
 		msgErreur = msgErreur.concat("Erreur: l\'identifiant doit contenir des" + 
@@ -464,16 +459,24 @@ var creerSondage = function(titre, id, dateDebut, dateFin, heureDebut, heureFin)
 	if(sondageExiste(id)){
 		msgErreur = msgErreur.concat("Erreur: L\’identifiant de sondage " +
 		"correspond à un sondage existant.");
-	};
-	
-	// Cela ne fonctionne pas encore... Il doit y avoir une problème avec le serveur... On devrait appeller la fonction à partir du html !!!  glitch
-	if(msgErreur != ""){ // si une des erreur survient...
-		texte = texte.split(txtAModifier).join(msgErreur);
-		return texte;
 	}
 	
-	var tabSondage = [titre, id, dateDebut, dateFin, heureDebut, heureFin, 
-		ecartJour, ecartHeure];
+	return msgErreur;
+};
+
+/* Fonction qui crée un sondage à partir des informations entrées. Retourne false 
+si les informations ne sont pas valides et true si elles sont valides. Vérifie diverses
+conditions (ex. Id contient uniquement des lettres, chiffres ou tirets, dateDebut est 
+inférieur à dateFin, heureDebut est inférieur à heureFin, le nombre de jour du sondage
+n'excède pas 30 jours. */
+var creerSondage = function(titre, id, dateDebut, dateFin, heureDebut, heureFin) {
+    
+	// si une des contions n'est pas respectée...
+	if(conditionInfo(id, dateDebut, dateFin, heureDebut, heureFin) != ""){ 
+		return false;
+	}
+	
+	var tabSondage = [titre, id, dateDebut, dateFin, heureDebut, heureFin];
 		
 	fs.mkdirSync(dirSondage + id); // crée le dossier du sondage
 	
