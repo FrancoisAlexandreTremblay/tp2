@@ -307,6 +307,45 @@ var getCalendar = function (sondageId) {
     return texte;
 };
 
+// Fonction qui prend en paramètre un tableau des tableaux des disponobilités
+// et retourne un tableau avec une somme sur toute les disponibilités
+var dispoStats = function (table){
+
+	var stats = []; // variable pour rétourner le tableau cummulatif de stats
+	var acc = 0; //accumulateur de la somme
+
+	for(var i = 0; i < table[0].length; i++){
+
+	acc = 0;
+		for(var j = 0; j < table.length; j++){
+
+			acc += +table[j][i]; //le + est pour convertir le texte en nbr
+		}
+
+		stats.push(acc);
+	}
+	return stats;
+
+};
+
+// Fonction qui retourne la valeur minimale et maximale d’un tableau 
+var minMax = function (t) {
+
+	var min = t[0];
+	var max = t[0];
+
+	for (var i=1; i<t.length; i++) {
+		if (t[i] < min) {
+			min = t[i];
+		}
+		if (t[i] > max) {
+			max = t[i];
+		}
+	}
+
+	return [min,max];
+};
+
 /* Fonction qui retourne le tableau résultat encodé en HTML. Prend en paramètre 
 un tableau d'élément qui est utilisé pour constituer le tableau. */
 var resultatsHTML = function(table, sondageId){
@@ -316,73 +355,96 @@ var resultatsHTML = function(table, sondageId){
 		"participants.csv").split("\n");
 
 	// entrer chaque participant sur son propre tableau du format [,nom, dispo]
-    participants = participants.map(function(x){return x.split(",");});
+	participants = participants.map(function(x){return x.split(",");});
 
-    console.log("rHTML participants ");
-    console.log(participants);
+	console.log("rHTML participants ");
+	console.log(participants);
 	
 	// variable pour collecter et faciliter le travaille sur les disponibilités 
-    var tabDispo = [];
-    
-    for(var i = 0; i<participants.length-1;i++){
-        tabDispo.push(participants[i][2].split(""));
-    }
-    
-    console.log(tabDispo);
+	var tabDispo = [];
+
+	for(var i = 0; i<participants.length-1;i++){
+		tabDispo.push(participants[i][2].split(""));
+	}
+
+	console.log(tabDispo);
+
+
+	// variable qui enregistre le total de disponibilités pour chaque case
+	var dipoEnesemble = dispoStats(tabDispo);
+	console.log("dispoendemble");
+	console.log(dipoEnesemble);
+
+	//variable pour garder en mémoire la meilleure et la pire dispo
+	var minEtMax = minMax(dipoEnesemble);
+	console.log("minmax");
+	console.log(minEtMax);
 	
 	// préparer les variable de style CSS
-    var max = "class = \"max\"";
-    var min = "class = \"min\"";
-    
-    // variable qui ramasse les styles pour chaque participant dans un tableau
-    var tabStyles = [];
-    for(var i = 0; i < tabDispo.length; i++){
-        var couleur = genColor(i,tabDispo.length);
+	var max = "class = \"max\"";
+	var min = "class = \"min\"";
+
+	// variable qui ramasse les styles pour chaque participant dans un tableau
+	var tabStyles = [];
+	for(var i = 0; i < tabDispo.length; i++){
+		var couleur = genColor(i,tabDispo.length);
 		tabStyles.push("style =\"background-color:" + couleur +
 			"; color: "+ couleur + "\"");
-    }
+	}
 
 	// variable pour collecter l'HTML de l'entête du tableau de résultats
-    var entete = "";
-	
-    for(var i = 0; i < table[0].length; i++){
-        entete += tag("th","",table[0][i]);
-    }
-    // les dates du tableau
-    entete = tag("tr","",entete);
-    
-    var cellules = ""; //variable pour enregister l<HTML des cellules
-    var lignes = ""; //variable pour enregister l<HTML des rangees
+	var entete = "";
+
+	for(var i = 0; i < table[0].length; i++){
+		entete += tag("th","",table[0][i]);
+	}
+	// les dates du tableau
+	entete = tag("tr","",entete);
+
+	var cellules = ""; //variable pour enregister l<HTML des cellules
+	var lignes = ""; //variable pour enregister l<HTML des rangees
 	var n = -2; //variable utilisé pour décaler la position des 
-    //disponibilités par rapport aux boucles
-    
-    for(var i = 1; i < table.length; i++){//parcure l'hauteur du tableau
-        
-        for(var j = 0; j <table[i].length; j++){//parcure la largeur du tableau
-			
-            if(j == 0) cellules += tag("th","",table[i][j]);
-            else {
-                
-                var accBarres=""; //variable pour accumuler les syles si dispo
-                
-                //boucle pour vérifier les dispo à la cellule currante
-                for(var k = 0; k< tabDispo.length; k++){
-                    
-                        if(tabDispo[k][i+j+n] == 1){
-                            accBarres += tag("span",tabStyles[k],".");
-                        }
-                    }
-                cellules += tag("td", max,accBarres, "");
-                accBarres="";
-            }
-        }
-        
-        lignes += tag("tr","",cellules);
-        cellules ="";
-        n += 2;
-    }
-    
-    return tag("table", "", entete + lignes);
+	//disponibilités par rapport aux boucles
+
+	for(var i = 1; i < table.length; i++){//parcure l'hauteur du tableau
+
+		for(var j = 0; j < table[i].length; j++){//parcure la largeur du tableau
+
+			if(j == 0) cellules += tag("th","",table[i][j]);
+			else {
+
+				var accBarres=""; //variable pour accumuler les syles si dispo
+
+				//boucle pour vérifier les dispo à la cellule currante
+				for(var k = 0; k < tabDispo.length; k++){
+
+						if(tabDispo[k][i+j+n] == 1){
+							accBarres += tag("span",tabStyles[k],".");
+						}
+					}
+				if(dipoEnesemble[i+j+n] == minEtMax[0]){
+
+					cellules += tag("td", min,accBarres, "");
+				}
+				else if(dipoEnesemble[i+j+n] == minEtMax[1]){
+
+					cellules += tag("td", max,accBarres, "");
+
+				}
+				else {
+					cellules += tag("td", "",accBarres, "");
+				}
+					accBarres="";
+				console.log(i+j+n);
+			} // fermer else pas de TH
+		}
+
+		lignes += tag("tr","",cellules);
+		cellules ="";
+		n += table[0].length-2;
+	}
+
+	return tag("table", "", entete + lignes);
 };
 
 /* Retourne le texte HTML à afficher à l'utilisateur pour voir les résultats de 
