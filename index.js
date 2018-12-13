@@ -146,7 +146,13 @@ var MILLIS_PAR_JOUR = (24 * 60 * 60 * 1000);
 // Fonction qui écrit un sondage CSV si le fichier n'existe pas déjà
 var ecrireCSV = function (path, tab) {
 	
-	var contenu = tab.join(",") + "\n";
+	if(tab == ""){
+		var contenu = tab.join("");
+		
+	} else {
+		var contenu = tab.join(",") + "\n";
+	}
+
 	writeFile(path, contenu);
 };
 
@@ -239,9 +245,8 @@ var initTable = function(sondageId){
 	return tableId;
 };
 
-/* Fonction qui retourne un tableau encodé en HTML. Prend en paramètre un 
-tableau d'élément qui est utilisé pour constituer le tableau. 
-----retourne le tab complet*/
+/* Fonction qui retourne le calendrier encodé en HTML. Prend en paramètre un 
+tableau d'élément qui est utilisé pour constituer le tableau. */
 var calendrierHTML = function(table){
 	
     var id = "id=\"calendrier\" ";
@@ -279,7 +284,32 @@ var calendrierHTML = function(table){
     return tag("table", id + onMsDwn + onMsOvr + dtJrs + dtHrs, entete + lignes);
 };
 
-var resultatsHTML = function(table){
+/* Retourne le texte HTML à afficher à l'utilisateur pour répondre au
+sondage demandé. Retourne false si le calendrier demandé n'existe pas. */
+var getCalendar = function (sondageId) {
+	
+	var texte = readFile("template/calendar.html");
+	var titre = readFile(dirSondage + sondageId + "/" + sondageId +
+	".csv").split(",")[0];
+	var table = calendrierHTML(initTable(sondageId));
+	var url = "http://localhost:1337/" + sondageId;
+	
+	var ancienItem = ["{{titre}}", "{{table}}", "{{url}}"]; 
+	var nouvelItem = [titre, table, url];
+	
+	//remplacer les anciens items du fichier par les nouveaux items
+	for(var i = 0; i < nouvelItem.length; i++){
+		texte = modifierTxt(texte, ancienItem[i], nouvelItem[i]);
+	}
+	
+	// return false si le calendrier n'existe pas
+	
+    return texte;
+};
+
+/* Fonction qui retourne le tableau résultat encodé en HTML. Prend en paramètre 
+un tableau d'élément qui est utilisé pour constituer le tableau. */
+var resultatHTML = function(table){
 
     var entete = "";
     for(var i = 0; i < table[0].length; i++){
@@ -305,29 +335,6 @@ var resultatsHTML = function(table){
     return tag("table", "", entete + lignes);
 };
 
-/* Retourne le texte HTML à afficher à l'utilisateur pour répondre au
-sondage demandé. Retourne false si le calendrier demandé n'existe pas. */
-var getCalendar = function (sondageId) {
-	
-	var texte = readFile("template/calendar.html");
-	var titre = readFile(dirSondage + sondageId + "/" + sondageId +
-	".csv").split(",")[0];
-	var table = calendrierHTML(initTable(sondageId));
-	var url = "http://localhost:1337/" + sondageId;
-	
-	var ancienItem = ["{{titre}}", "{{table}}", "{{url}}"]; 
-	var nouvelItem = [titre, table, url];
-	
-	//remplacer les anciens items du fichier par les nouveaux items
-	for(var i = 0; i < nouvelItem.length; i++){
-		texte = modifierTxt(texte, ancienItem[i], nouvelItem[i]);
-	}
-	
-	// return false si le calendrier n'existe pas
-	
-    return texte;
-};
-
 /* Retourne le texte HTML à afficher à l'utilisateur pour voir les résultats de 
 sondage demandé. Retourne false si le calendrier demandé n'existe pas. */
 var getResults = function (sondageId) {
@@ -335,7 +342,7 @@ var getResults = function (sondageId) {
 	var texte = readFile("template/results.html");
 	var titre = readFile(dirSondage + sondageId + "/" + sondageId +
 	".csv").split(",")[0];
-	var table = initResultats(sondageId);
+	var table = resultatHTML(initTable(sondageId));
 	var url = "http://localhost:1337/" + sondageId + "\/results";
 	
 	var ancienItem = ["{{titre}}", "{{table}}", "{{url}}"]; 
@@ -470,15 +477,13 @@ var creerSondage = function(titre, id, dateDebut, dateFin, heureDebut, heureFin)
 		
 	fs.mkdirSync(dirSondage + id); // crée le dossier du sondage
 	
-	console.log(dirSondage + id);
-	
 	// CSV des informations sur le sondage
 	var path = dirSondage + id + "/" + id + ".csv"; 
 	ecrireCSV(path, tabSondage);
 	
 	// CSV des participants
 	var path = dirSondage + id + "/" + "participants" + ".csv"
-	ecrireCSV(path, [""]);
+	ecrireCSV(path, []);
 	
 	
     return true;
@@ -490,16 +495,12 @@ envoyées au format textuel fourni par la fonction compacterDisponibilites() de
 public/calendar.js. La fonction ne retourne rien. */
 var ajouterParticipant = function(sondageId, nom, disponibilites) {
 	
-	var participants = readFile(dirSondage + sondageId + "/" + sondageId +
+	var participants = readFile(dirSondage + sondageId + "/participants" +
 	".csv").split(",");
+
+	participants.push(nom, disponibilites);
 	
-	//for()
-	//if(participants[0] == nom){
-	//	return;
-		//} else {
-	//	participant
-	//}
-	
+	ecrireCSV(dirSondage + sondageId + "/participants" + ".csv", participants);
 };
 
 // Génère la `i`ème couleur parmi un nombre total `total` au format
