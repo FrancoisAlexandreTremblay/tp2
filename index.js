@@ -136,6 +136,7 @@ var getIndex = function (replacements) {
 
 var dirSondage = "template/CSV/"; // chemin du folder des sondages
 
+
 var mois = [
 	'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin',
 	'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Dec'
@@ -194,6 +195,8 @@ var tabJourMois = function (dateDebut, dateFin){
 	return resultatJour;
 };
 
+/* Fonction qui construit un tableau des heures entre deux heures données avec
+une première entrée vide ex. tabHeure(5,7) retourne ["", "5h", "6h", "7h"] */ 
 var tabHeure = function (heureDebut, heureFin){
 
 	var resultat= [""];
@@ -255,7 +258,8 @@ var calendrierHTML = function(table){
 	var dtJrs = "data-nbjours=\"" + (table[0].length-1) + "\" ";
 	var dtHrs = "data-nbheures=\"" + (table.length-1) + "\" ";
 
-	var entete = "";
+	// variable pour accumuler le code HTML de l'entête du tableau (les dates)
+	var entete = ""; 
 
 	for(var i = 0; i < table[0].length; i++){ // ligne des dates
 		entete += tag("th","",table[0][i]);
@@ -263,7 +267,9 @@ var calendrierHTML = function(table){
 
 	entete = tag("tr","",entete);
 
-	var cellules = "";
+	// variable pour accumuler le code HTML de chaque cellule du calendrier
+	var cellules = ""; 
+	// variable pour accumuler le code HTML de chaque rangée du calendrier
 	var lignes = "";
 
 	for(var i = 1; i < table.length; i++){ // colonne du tableau
@@ -307,8 +313,9 @@ var getCalendar = function (sondageId) {
 	return texte;
 };
 
-// Fonction qui prend en paramètre un tableau des tableaux des disponobilités
-// et retourne un tableau avec une somme sur toute les disponibilités
+/* Fonction qui prend en paramètre un tableau des tableaux des disponobilités
+et retourne un tableau avec une somme sur toute les disponibilités
+ex. dispoStats([[1,1,0],[1,0,0],[1,1,1]]) retourne [3, 2, 1] */
 var dispoStats = function (table){
 
 	var stats = []; // variable pour rétourner le tableau cummulatif de stats
@@ -328,7 +335,8 @@ var dispoStats = function (table){
 
 };
 
-// Fonction qui retourne la valeur minimale et maximale d’un tableau 
+/* Fonction qui retourne la valeur minimale et maximale d’un tableau 
+ex. minMax([1,3,6,0,10,6]) retourne [0, 10] */
 var minMax = function (t) {
 
 	var min = t[0];
@@ -375,15 +383,14 @@ var resultatsHTML = function(table, sondageId){
 	var max = "class = \"max\"";
 	var min = "class = \"min\"";
 
-	// variable qui ramasse les styles pour chaque participant dans un tableau
+	// variable qui ramasse dans un tableau les styles pour chaque participant
 	var tabStyles = [];
 	for(var i = 0; i < tabDispo.length; i++){
 		var couleur = genColor(i,tabDispo.length);
 		tabStyles.push("style =\"background-color:" + couleur +
 			"; color: "+ couleur + "\"");
 	}
-
-	// variable pour collecter l'HTML de l'entête du tableau de résultats
+	// variable pour collecter l'HTML de l'entête du tableau des résultats
 	var entete = "";
 
 	for(var i = 0; i < table[0].length; i++){
@@ -394,8 +401,8 @@ var resultatsHTML = function(table, sondageId){
 
 	var cellules = ""; //variable pour enregister l<HTML des cellules
 	var lignes = ""; //variable pour enregister l<HTML des rangees
-	var n = -2; //variable utilisée pour décaler la position des 
-	//disponibilités par rapport aux boucles
+	var n = -2; /*variable utilisée pour décaler la position  pour la boucle
+	qui parcure le tableau des disponibilités */
 
 	for(var i = 1; i < table.length; i++){//parcure l'hauteur du tableau
 
@@ -429,7 +436,7 @@ var resultatsHTML = function(table, sondageId){
 		}
 
 		lignes += tag("tr","",cellules);
-		cellules ="";
+		cellules =""; // vider le code HTML à chaque itération
 		n += table[0].length-2; //décalage selon le nombre de jours à ch. iter.
 	}
 
