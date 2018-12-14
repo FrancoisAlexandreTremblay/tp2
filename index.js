@@ -291,6 +291,7 @@ var getCalendar = function (sondageId) {
 	var texte = readFile("template/calendar.html");
 	var titre = readFile(dirSondage + sondageId + "/" + sondageId +
 	".csv").split(",")[0];
+	
 	var table = calendrierHTML(initTable(sondageId));
 	var url = "http://localhost:1337/" + sondageId;
 
@@ -436,35 +437,39 @@ var resultatsHTML = function(table, sondageId){
 	return tag("table", "", entete + lignes);
 };
 
+// Fonction qui retourne le style de la legende.
+var legendeStyle = function (participants) {
+	
+	var ligneLeg = "";
+	
+	for(var i = 0; i < participants.length - 1; i++){
+
+		ligneLeg += tag("li","style=\"background-color:" +
+		genColor(i,participants.length - 1) + "\"",participants[i][1]);
+	}
+	
+	return ligneLeg;
+};
+
 /* Retourne le texte HTML à afficher à l'utilisateur pour voir les résultats de 
 sondage demandé. Retourne false si le calendrier demandé n'existe pas. */
 var getResults = function (sondageId) {
 
 	var texte = readFile("template/results.html");
 
-	var titre = readFile(dirSondage + sondageId + "/" + sondageId +
-	".csv").split(",")[0];
-
 	var participants = readFile(dirSondage + sondageId + "/" + 
-		"participants.csv").split("\n");
+	"participants.csv").split("\n"); // fichier CSV des données des participants
 
-	// entrer chaque participant sur son propre tableau du format [,nom, dispo]
-	participants = participants.map(function(x){return x.split(",");});
-
+	// split les données des participants dans le format [,nom, dispo]
+	participants = participants.map(function(x) { return x.split(","); });
+	
+	var titre = readFile(dirSondage + sondageId + "/" + sondageId +
+	".csv").split(",")[0]; // titre du sondage
 	var table = resultatsHTML(initTable(sondageId), sondageId);
+	var url = "http://localhost:1337/" + sondageId ;	
 
-	var url = "http://localhost:1337/" + sondageId ;	var legende ="";
-	var ligneLeg = "";
-	for(var i = 0; i< participants.length-1; i++){
-
-		ligneLeg += tag("li","style=\"background-color:"+
-			genColor(i,participants.length-1)+"\"",participants[i][1]);
-	}
-
-
-	legende = tag("ul","",ligneLeg);
+	var legende = tag("ul", "", legendeStyle(participants));
 	var ancienItem = ["{{titre}}", "{{table}}", "{{url}}", "{{legende}}"]; 
-
 	var nouvelItem = [titre, table, url, legende];
 
 	//remplacer les anciens items du fichier par les nouveaux items
@@ -473,7 +478,6 @@ var getResults = function (sondageId) {
 	}
 
 	// return false si le calendrier n'existe pas
-
 	return texte;
 };
 
