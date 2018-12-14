@@ -30,7 +30,7 @@
         <h1>Créer un sondage</h1>
 
         <div id="error">
-			
+			Erreur : Assurez-vous d'entrer des données valides
         </div>
 
         <form action="/" method="GET">
@@ -133,110 +133,10 @@
         </form>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-
-            
-			
-			
-			
-// Fonction qui calcule le nombre de jour entre deux dates.
-var jourEntreDate = function(dateDebut, dateFin){
-	return convDateEnJour(dateFin) - convDateEnJour(dateDebut);
-};
-			
-			var convDateEnJour = function (date){
-
-	var date = date.split("-"); 
-	date = {annee: +date[0], mois: +date[1], jour: +date[2]};
-
-	var janOuFev = 1 - Math.floor((date.mois + 9)/12);
-	var anneeAjustee = date.annee - janOuFev;
-	var quadriennat = 4 * 365 + 1;
-	var depuis1Mars = Math.ceil((306*(date.mois - 3 + 12*janOuFev)-5)/10);
-
-	return Math.floor(anneeAjustee/4) * quadriennat + (anneeAjustee % 4) * 365 
-	+ depuis1Mars + date.jour;
-};
-			
-			var caracValide = function(tabCar){
-
-	if(tabCar == "") return false;
-
-	for(var i = 0; i < tabCar.length; i++){
-
-		var car = tabCar[i];
-
-		if((car >= "a" && car <= "z") || (car >= "A" && car <= "Z") ||
-		   (car >= "0" && car <= "9") || (car == "-") || 
-		   (car >= "À" && car <= "Ö") || (car >= "Ù" && car <= "ö") || 
-		   (car >= "ù" && car <= "ü")){
-			continue;
-		} else {
-			return false;
-		}
-	}
-
-	return true;
-};
-
-				var conditionInfo = function (id, dateDebut, dateFin, heureDebut, heureFin){
-
-					// nombre de jour entre dateDebut et dateFin
-					var ecartJour = jourEntreDate(dateDebut, dateFin);
-					var ecartHeure = heureFin - heureDebut;
-
-
-					var msgErreur = [];
-
-					// Si le id ne contient pas des caractères valides, retourne false. 
-					if(!caracValide(id.split("")) || id == "") {
-						msgErreur = msgErreur.concat("Erreur: l\'identifiant doit contenir des lettres, chiffres ou tirets.");
-					}
-
-					// Si dateDébut est supérieure à dateFin, retourne msg d'erreur et false. 
-					if(ecartJour < 0) {
-						msgErreur = msgErreur.concat("Erreur: La date de fin doit être après la date de début.");
-					}
-
-					// Si nombre de jours est supérieur à 30, retourne msg d'erreur et false.
-					if(ecartJour > 30) {
-						msgErreur = msgErreur.concat("Erreur: La durée maximale du sondage est de 30 jours.");
-					}
-
-					// Si heureDebut est supérieur à heureFin, retourne msg d'erreur et false.
-					if(ecartHeure < 0 && ecartJour == 0) {
-						msgErreur = msgErreur.concat("Erreur: L\’heure de fin doit être après l\’heure de début.");	
-					}
-
-					// Si sondage existe dans le folder, retourne msg d'erreur et false.
-					if(sondageExiste(id)){
-						msgErreur = msgErreur.concat("Erreur: L\’identifiant de sondage correspond à un sondage existant.");
-					}
-
-					return msgErreur;
-				};
-				
-				if(location.search == '') {
-                    document.getElementById("error").style.display = 'none';
-
+                if(location.search == '') {
+                    document.getElementById('error').style.display = 'none';
                 }
-				else {
-					var identifiant = document.getElementsByName("id").value;
-					var dtDebut = document.getElementById("debut").value;
-					var dtFin = document.getElementById("fin").value;
-					var hrDebut = document.getElementsByName("heureDebut");
-					var hrFin = document.getElementsByName("heureFin");
-					console.log(identifiant);
-					console.log(dtDebut);
-					console.log(dtFin);
-					console.log(hrDebut.options[hrDebut.selectedIndex].text);
-					console.log(hrFin);
-					
-					var texte = conditionInfo(identifiant, dtDebut, dtFin, hrDebut, hrFin);
-					document.getElementByID("error").innerHTML = texte;
-					}
-
-			
-			});
+            });
         </script>
     </body>
 </html>
