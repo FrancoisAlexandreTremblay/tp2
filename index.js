@@ -499,6 +499,7 @@ var caracValide = function(tabCar){
 		   (car >= "À" && car <= "Ö") || (car >= "Ù" && car <= "ö") || 
 		   (car >= "ù" && car <= "ü")){
 			continue;
+			
 		} else {
 			return false;
 		}
@@ -507,17 +508,19 @@ var caracValide = function(tabCar){
 	return true;
 };
 
-/* Fonction qui converti une date en nombre de jour. glitch (prendre la 
-fonction du premier exercice). */
+// Fonction qui converti une date en nombre de jour. 
 var convDateEnJour = function (date){
 
 	var date = date.split("-"); 
 	date = {annee: +date[0], mois: +date[1], jour: +date[2]};
+	
+	var quadriennat = 4 * 365 + 1; // nb jours par cycle de 4 ans.
 
-	var janOuFev = 1 - Math.floor((date.mois + 9)/12);
+	var janOuFev = 1 - Math.floor((date.mois + 9)/12); // ajuste pour jan et fev
 	var anneeAjustee = date.annee - janOuFev;
-	var quadriennat = 4 * 365 + 1;
-	var depuis1Mars = Math.ceil((306*(date.mois - 3 + 12*janOuFev)-5)/10);
+	
+	// nb jours depuis 1er mars
+	var depuis1Mars = Math.ceil((306*(date.mois - 3 + 12*janOuFev) - 5)/10); 
 
 	return Math.floor(anneeAjustee/4) * quadriennat + (anneeAjustee % 4) * 365 
 	+ depuis1Mars + date.jour;
@@ -528,7 +531,7 @@ var jourEntreDate = function(dateDebut, dateFin){
 	return convDateEnJour(dateFin) - convDateEnJour(dateDebut);
 };
 
-/* Fonction qui vérifie si le directory du sondage (id) existe déjà. Retourne 
+/* Fonction qui vérifie si le dossier du sondage (id) existe. Retourne 
 false si le sondage n'existe pas et true s'il existe. */
 var sondageExiste = function (id){
 
@@ -557,32 +560,29 @@ var conditionInfo = function (id, dateDebut, dateFin, heureDebut, heureFin){
 
 	var msgErreur = [];
 
-	// Si le id ne contient pas des caractères valides, retourne false. 
+	// Si le id ne contient pas des caractères valides
 	if(!caracValide(id.split("")) || id == "") {
 		msgErreur = msgErreur.concat("Erreur: l\'identifiant doit contenir des"+
 		" lettres, chiffres ou tirets.");
 	}
 
-	// Si dateDébut est supérieure à dateFin, retourne msg d'erreur et false. 
-	if(ecartJour < 0) {
+	if(ecartJour < 0) { // si dateDébut est supérieure à dateFin
 		msgErreur = msgErreur.concat("Erreur: La date de fin doit être après" +
 		" la date de début.");
 	}
 
-	// Si nombre de jours est supérieur à 30, retourne msg d'erreur et false.
-	if(ecartJour > 30) {
+	if(ecartJour > 30) { // si nombre de jours est supérieur à 30
 		msgErreur = msgErreur.concat("Erreur: La durée maximale du sondage" + 
 		" est de 30 jours.");
 	}
 
-	// Si heureDebut est supérieur à heureFin, retourne msg d'erreur et false.
-	if(ecartHeure < 0 && ecartJour == 0) {
+	
+	if(ecartHeure < 0 && ecartJour == 0) { // si heureDebut est supérieur à hFin
 		msgErreur = msgErreur.concat("Erreur: L\’heure de fin doit être après" +
 		" l\’heure de début.");	
 	}
 
-	// Si sondage existe dans le folder, retourne msg d'erreur et false.
-	if(sondageExiste(id)){
+	if(sondageExiste(id)){ // si sondage existe dans le dossier
 		msgErreur = msgErreur.concat("Erreur: L\’identifiant de sondage " +
 		"correspond à un sondage existant.");
 	}
@@ -595,8 +595,7 @@ false si les informations ne sont pas valides et true si elles sont valides.
 Vérifie diverses conditions (ex. Id contient uniquement des lettres, chiffres ou
 tirets, dateDebut est inférieur à dateFin, heureDebut est inférieur à heureFin,
 le nombre de jour du sondage n'excède pas 30 jours. */
-var creerSondage = function(titre, id, dateDebut, 
-	dateFin, heureDebut, heureFin) {
+var creerSondage = function(titre, id, dateDebut, dateFin, heureDebut, heureFin){
 
 	// si une des contions n'est pas respectée...
 	if(conditionInfo(id, dateDebut, dateFin, heureDebut, heureFin) != ""){ 
@@ -618,43 +617,43 @@ var creerSondage = function(titre, id, dateDebut,
 	return true;
 };
 
-/* Fonction qui ajoute un participant et ses disponibilités aux résultats du 
-aux résultats du sondage dans le CSV des participants. Les disponibilités sont 
-envoyées au format textuel fourni par la fonction compacterDisponibilites() de 
-public/calendar.js. La fonction ne retourne rien. */
+/* Fonction qui ajoute un participant et ses disponibilités dans le CSV des 
+participants. Les disponibilités sont envoyées au format textuel fourni par la 
+fonction compacterDisponibilites() de public/calendar.js. La fonction ne 
+retourne rien. */
 var ajouterParticipant = function(sondageId, nom, disponibilites) {
 	
 	var participants = readFile(dirSondage + sondageId + "/participants" +
-	".csv").split(",");
+	".csv").split(","); // lecture du sondage CSV des participants
 
-	participants.push(nom, disponibilites);
+	participants.push(nom, disponibilites); // ajoute le participants
 	
 	ecrireCSV(dirSondage + sondageId + "/participants" + ".csv", participants);
 };
 
-// Fonction qui conferti un numéro de numérotation décimale en hexadecimale,
-// utilisée dans la fonction genColor
+/* Fonction qui converti un numéro de numérotation décimale en hexadecimale 
+utilisée dans la fonction genColor. */
 var convHex = function(nb){
+	
 	var nbHex = nb.toString(16);
-		if (nbHex.length % 2) nbHex = '0' + nbHex;
+	
+	if (nbHex.length % 2) nbHex = '0' + nbHex;
+		
 	return nbHex;
 };
 
-// Génère la `i`ème couleur parmi un nombre total `total` au format
-// hexadécimal HTML
-//
-// Notez que pour un grand nombre de couleurs (ex.: 250), générer
-// toutes les couleurs et les afficher devrait donner un joli dégradé qui
-// commence en rouge, qui passe par toutes les autres couleurs et qui
-// revient à rouge.
+/* Génère la `i`ème couleur parmi un nombre total `total` au format
+hexadécimal HTML. Notez que pour un grand nombre de couleurs (ex.: 250), générer
+toutes les couleurs et les afficher devrait donner un joli dégradé qui commence 
+en rouge, qui passe par toutes les autres couleurs et qui revient à rouge. */
 var genColor = function(i, nbTotal) {
 
-	var teinte = (i/nbTotal)*360;
+	var teinte = (i/nbTotal) * 360; // génère une teinte
 
-	var c = 0.7;
-	var h = teinte/60;
+	var c = 0.7; // constante 
+	var h = teinte/60; 
 
-	var x = convHex(Math.floor(255*c*(1-(Math.abs(h%2-1)))));
+	var x = convHex(Math.floor(255 * c * (1 - (Math.abs(h % 2 - 1)))));
 	var c = convHex(Math.floor(c * 255));
 
 	switch(Math.floor(h)){
@@ -669,14 +668,7 @@ var genColor = function(i, nbTotal) {
 
 };
 
-
-
-
-/*
- * Création du serveur HTTP
- * Note : pas besoin de toucher au code ici (sauf peut-être si vous
- * faites les bonus)
- */
+// Création du serveur HTTP
 http.createServer(function (requete, reponse) {
 	var url = urlParse(requete.url);
 
@@ -748,17 +740,17 @@ http.createServer(function (requete, reponse) {
 var testcreerSondage = function(){
 
 	// id différent d'une lettre, un chiffre ou un tiret.
-	assert(creerSondage("test","1e-Àé","2018-11-18","2018-11-23","2h","17h") == true);
-	assert(creerSondage("test","1e-Àé.","2018-11-18","2018-11-23","2h","17h") == false);
-	assert(creerSondage("test","","2018-11-18","2018-11-23","2h","17h") == false);
-	assert(creerSondage("test"," ","2018-11-18","2018-11-23","2h","17h") == false);
+	assert(conditionInfo("1e-Àé","2018-11-18","2018-11-23","2h","17h") == true);
+	assert(conditionInfo("1e.Àé.","2018-11-18","2018-11-23","2h","17h") == false);
+	assert(conditionInfo("","2018-11-18","2018-11-23","2h","17h") == false);
+	assert(conditionInfo(" ","2018-11-18","2018-11-23","2h","17h") == false);
 
 	// date de début plus grande
-	assert(creerSondage("test","1e-","2018-11-24","2018-11-23","2h","17h") == false); 
+	assert(conditionInfo("1e-","2018-11-24","2018-11-23","2h","17h") == false); 
 	// nb jours de sondage supérieurs à 30.
-	assert(creerSondage("test","1e-","2018-11-18","2018-12-30","2h","17h") == false);
+	assert(conditionInfo("1e-","2018-11-18","2018-12-30","2h","17h") == false);
 	// heure de début plus grande
-	assert(creerSondage("test","1e-","2018-11-18","2018-11-23","2h","1h") == false); 
+	assert(conditionInfo("1e-","2018-11-18","2018-11-23","2h","1h") == false); 
  
 	
 };
