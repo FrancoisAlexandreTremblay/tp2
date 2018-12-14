@@ -46,6 +46,7 @@ function onMove(event) {
 	
 	if(event.buttons == 0) {  // si bouton n'est pas appuyé, retourne rien
 		return;
+		
 	} else {
 		onClick(event);
 	}

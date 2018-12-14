@@ -134,8 +134,7 @@ var getIndex = function (replacements) {
 //		|--- creerSondage()
 //		|--- getCalendar() 
 
-var dirSondage = "template/CSV/"; // chemin du folder des sondages
-
+var dirSondage = "template/CSV/"; // chemin du dossier des sondages
 
 var mois = [
 	'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin',
@@ -144,7 +143,7 @@ var mois = [
 
 var MILLIS_PAR_JOUR = (24 * 60 * 60 * 1000);
 
-// Fonction qui écrit un sondage CSV si le fichier n'existe pas déjà
+// Fonction qui écrit un fichier CSV
 var ecrireCSV = function (path, tab) {
 
 	if(tab == ""){
@@ -241,9 +240,6 @@ var initTable = function(sondageId){
 	tableId.map(function (x, j){ // fusionne nouveau tabId et tabHeure
 			return x.unshift(tabHeures[j]); 
 		});
-	//for(var i = 1; i < tableId.length; i++){
-	//    tableId[i].unshift(tabHeures[i]);
-	//} 
 
 	return tableId;
 };
@@ -310,7 +306,6 @@ var getCalendar = function (sondageId) {
 	}
 
 	// return false si le calendrier n'existe pas
-
 	return texte;
 };
 
@@ -346,8 +341,8 @@ var minMax = function (t) {
 	for (var i=1; i<t.length; i++) {
 		if (t[i] < min) {
 			min = t[i];
-		}
-		if (t[i] > max) {
+			
+		} else if(t[i] > max) {
 			max = t[i];
 		}
 	}
@@ -364,8 +359,7 @@ var resultatsHTML = function(table, sondageId){
 		"participants.csv").split("\n");
 
 	// entrer chaque participant sur son propre tableau du format [,nom, dispo]
-	participants = participants.map(function(x){return x.split(",");});
-
+	participants = participants.map(function(x){ return x.split(","); });
 
 	// variable pour collecter et faciliter le travaille sur les disponibilités 
 	var tabDispo = [];
@@ -387,6 +381,7 @@ var resultatsHTML = function(table, sondageId){
 	// variable qui ramasse dans un tableau les styles pour chaque participant
 	var tabStyles = [];
 	for(var i = 0; i < tabDispo.length; i++){
+		
 		var couleur = genColor(i,tabDispo.length);
 		tabStyles.push("style =\"background-color:" + couleur +
 			"; color: "+ couleur + "\"");
@@ -402,12 +397,13 @@ var resultatsHTML = function(table, sondageId){
 
 	var cellules = ""; //variable pour enregister l<HTML des cellules
 	var lignes = ""; //variable pour enregister l<HTML des rangees
+	
 	var n = -2; /*variable utilisée pour décaler la position  pour la boucle
-	qui parcure le tableau des disponibilités */
+	qui parcoure le tableau des disponibilités */
 
-	for(var i = 1; i < table.length; i++){//parcure l'hauteur du tableau
+	for(var i = 1; i < table.length; i++){//parcoure les lignes du tab
 
-		for(var j = 0; j < table[i].length; j++){//parcure la largeur du tableau
+		for(var j = 0; j < table[i].length; j++){//parcoure les colonnes du tab
 
 			if(j == 0) cellules += tag("th","",table[i][j]);
 			else {
@@ -426,9 +422,11 @@ var resultatsHTML = function(table, sondageId){
 				if(dipoEnesemble[i+j+n] == minEtMax[0]){
 					cellules += tag("td", min,accBarres, "");
 				}
+				
 				else if(dipoEnesemble[i+j+n] == minEtMax[1]){
 					cellules += tag("td", max,accBarres, "");
 				}
+				
 				else {
 					cellules += tag("td", "",accBarres, "");
 				}
@@ -437,6 +435,7 @@ var resultatsHTML = function(table, sondageId){
 		}
 
 		lignes += tag("tr","",cellules);
+		
 		cellules =""; // vider le code HTML à chaque itération
 		n += table[0].length-2; //décalage selon le nombre de jours à ch. iter.
 	}
@@ -472,10 +471,11 @@ var getResults = function (sondageId) {
 	
 	var titre = readFile(dirSondage + sondageId + "/" + sondageId +
 	".csv").split(",")[0]; // titre du sondage
+	
 	var table = resultatsHTML(initTable(sondageId), sondageId);
 	var url = "http://localhost:1337/" + sondageId ;	
-
 	var legende = tag("ul", "", legendeStyle(participants));
+	
 	var ancienItem = ["{{titre}}", "{{table}}", "{{url}}", "{{legende}}"]; 
 	var nouvelItem = [titre, table, url, legende];
 
