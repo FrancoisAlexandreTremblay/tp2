@@ -135,6 +135,11 @@ var getIndex = function (replacements) {
 //		|--- getCalendar() 
 
 var dirSondage = "template/CSV/"; // chemin du dossier des sondages
+// création du dossier où les sondages seront enregistrés, si pas encore créé
+if(fs.readdirSync("template").indexOf("CSV") == -1){
+	fs.mkdirSync("template/CSV");
+}
+
 
 var mois = [
 	'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin',
@@ -290,10 +295,15 @@ var calendrierHTML = function(table){
 sondage demandé. Retourne false si le calendrier demandé n'existe pas. */
 var getCalendar = function (sondageId) {
 
+	// si le dossier du sondage requis est inexistant, retourner false
+	if(fs.readdirSync("template/CSV").indexOf(sondageId) == -1){
+		return false;
+	}
+
 	var texte = readFile("template/calendar.html");
 	var titre = readFile(dirSondage + sondageId + "/" + sondageId +
 	".csv").split(",")[0];
-	
+
 	var table = calendrierHTML(initTable(sondageId));
 	var url = "http://localhost:1337/" + sondageId;
 
@@ -353,7 +363,7 @@ var minMax = function (t) {
 /* Fonction qui retourne le tableau résultat encodé en HTML. Prend en paramètre 
 un tableau d'élément qui est utilisé pour constituer le tableau. */
 var resultatsHTML = function(table, sondageId){
-	
+
 	// variable pour enregister les données du fichier CSV de participants
 	var participants = readFile(dirSondage + sondageId + "/" + 
 		"participants.csv").split("\n");
@@ -381,7 +391,7 @@ var resultatsHTML = function(table, sondageId){
 	// variable qui ramasse dans un tableau les styles pour chaque participant
 	var tabStyles = [];
 	for(var i = 0; i < tabDispo.length; i++){
-		
+
 		var couleur = genColor(i,tabDispo.length);
 		tabStyles.push("style =\"background-color:" + couleur +
 			"; color: "+ couleur + "\"");
@@ -397,7 +407,7 @@ var resultatsHTML = function(table, sondageId){
 
 	var cellules = ""; //variable pour enregister l<HTML des cellules
 	var lignes = ""; //variable pour enregister l<HTML des rangees
-	
+
 	var n = -2; /*variable utilisée pour décaler la position  pour la boucle
 	qui parcoure le tableau des disponibilités */
 
@@ -422,20 +432,20 @@ var resultatsHTML = function(table, sondageId){
 				if(dipoEnesemble[i+j+n] == minEtMax[0]){
 					cellules += tag("td", min,accBarres, "");
 				}
-				
+
 				else if(dipoEnesemble[i+j+n] == minEtMax[1]){
 					cellules += tag("td", max,accBarres, "");
 				}
-				
+
 				else {
 					cellules += tag("td", "",accBarres, "");
 				}
 					accBarres="";
-			} // fermer else pas de TH
+			} // fermer else pas de <th>
 		}
 
 		lignes += tag("tr","",cellules);
-		
+
 		cellules =""; // vider le code HTML à chaque itération
 		n += table[0].length-2; //décalage selon le nombre de jours à ch. iter.
 	}
@@ -445,21 +455,26 @@ var resultatsHTML = function(table, sondageId){
 
 // Fonction qui retourne le style de la legende.
 var legendeStyle = function (participants) {
-	
+
 	var ligneLeg = "";
-	
+
 	for(var i = 0; i < participants.length - 1; i++){
 
 		ligneLeg += tag("li","style=\"background-color:" +
 		genColor(i,participants.length - 1) + "\"",participants[i][1]);
 	}
-	
+
 	return ligneLeg;
 };
 
 /* Retourne le texte HTML à afficher à l'utilisateur pour voir les résultats de 
 sondage demandé. Retourne false si le calendrier demandé n'existe pas. */
 var getResults = function (sondageId) {
+
+	// si le dossier du sondage requis est inexistant, retourner false
+	if(fs.readdirSync("template/CSV").indexOf(sondageId) == -1){
+		return false;
+	}
 
 	var texte = readFile("template/results.html");
 
@@ -468,14 +483,14 @@ var getResults = function (sondageId) {
 
 	// split les données des participants dans le format [,nom, dispo]
 	participants = participants.map(function(x) { return x.split(","); });
-	
+
 	var titre = readFile(dirSondage + sondageId + "/" + sondageId +
 	".csv").split(",")[0]; // titre du sondage
-	
+
 	var table = resultatsHTML(initTable(sondageId), sondageId);
 	var url = "http://localhost:1337/" + sondageId ;	
 	var legende = tag("ul", "", legendeStyle(participants));
-	
+
 	var ancienItem = ["{{titre}}", "{{table}}", "{{url}}", "{{legende}}"]; 
 	var nouvelItem = [titre, table, url, legende];
 
@@ -499,11 +514,11 @@ var caracValide = function(tabCar){
 		var car = tabCar[i];
 
 		if((car >= "a" && car <= "z") || (car >= "A" && car <= "Z") ||
-		   (car >= "0" && car <= "9") || (car == "-") || 
-		   (car >= "À" && car <= "Ö") || (car >= "Ù" && car <= "ö") || 
-		   (car >= "ù" && car <= "ü")){
+			(car >= "0" && car <= "9") || (car == "-") || 
+			(car >= "À" && car <= "Ö") || (car >= "Ù" && car <= "ö") || 
+			(car >= "ù" && car <= "ü")){
 			continue;
-			
+
 		} else {
 			return false;
 		}
@@ -517,12 +532,12 @@ var convDateEnJour = function (date){
 
 	var date = date.split("-"); 
 	date = {annee: +date[0], mois: +date[1], jour: +date[2]};
-	
+
 	var quadriennat = 4 * 365 + 1; // nb jours par cycle de 4 ans.
 
 	var janOuFev = 1 - Math.floor((date.mois + 9)/12); // ajuste pour jan et fev
 	var anneeAjustee = date.annee - janOuFev;
-	
+
 	// nb jours depuis 1er mars
 	var depuis1Mars = Math.ceil((306*(date.mois - 3 + 12*janOuFev) - 5)/10); 
 
@@ -607,7 +622,7 @@ var creerSondage = function(titre, id, dateDebut, dateFin, heureDebut, heureFin)
 	}
 
 	var tabSondage = [titre, id, dateDebut, dateFin, heureDebut, heureFin];
-		
+
 	fs.mkdirSync(dirSondage + id); // crée le dossier du sondage
 
 	// CSV des informations sur le sondage
@@ -626,23 +641,23 @@ participants. Les disponibilités sont envoyées au format textuel fourni par la
 fonction compacterDisponibilites() de public/calendar.js. La fonction ne 
 retourne rien. */
 var ajouterParticipant = function(sondageId, nom, disponibilites) {
-	
+
 	var participants = readFile(dirSondage + sondageId + "/participants" +
 	".csv").split(","); // lecture du sondage CSV des participants
 
 	participants.push(nom, disponibilites); // ajoute le participants
-	
+
 	ecrireCSV(dirSondage + sondageId + "/participants" + ".csv", participants);
 };
 
 /* Fonction qui converti un numéro de numérotation décimale en hexadecimale 
 utilisée dans la fonction genColor. */
 var convHex = function(nb){
-	
+
 	var nbHex = nb.toString(16);
-	
+	// ajouter un 0 pour toujour avoir de paires de 8 bits si seulement 1 chifre
 	if (nbHex.length % 2) nbHex = '0' + nbHex;
-		
+
 	return nbHex;
 };
 
@@ -660,6 +675,7 @@ var genColor = function(i, nbTotal) {
 	var x = convHex(Math.floor(255 * c * (1 - (Math.abs(h % 2 - 1)))));
 	var c = convHex(Math.floor(c * 255));
 
+	// décision pour la génération du code HTML RGB de couleurs en hexadecimale
 	switch(Math.floor(h)){
 		case 0: return "#" + c + x + "00";
 		case 1: return "#" + x + c + "00";
@@ -745,16 +761,15 @@ var testcreerSondage = function(){
 
 	// id différent d'une lettre, un chiffre ou un tiret.
 	assert(conditionInfo("1e-Àé","2018-11-18","2018-11-23","2h","17h") == true);
-	assert(conditionInfo("1e.Àé.","2018-11-18","2018-11-23","2h","17h") == false);
+	assert(conditionInfo("1e.Àé.","2018-11-18","2018-11-23","2h","17h")==false);
 	assert(conditionInfo("","2018-11-18","2018-11-23","2h","17h") == false);
 	assert(conditionInfo(" ","2018-11-18","2018-11-23","2h","17h") == false);
 
 	// date de début plus grande
-	assert(conditionInfo("1e-","2018-11-24","2018-11-23","2h","17h") == false); 
+	assert(conditionInfo("1e-","2018-11-24","2018-11-23","2h","17h") == false);
 	// nb jours de sondage supérieurs à 30.
 	assert(conditionInfo("1e-","2018-11-18","2018-12-30","2h","17h") == false);
 	// heure de début plus grande
-	assert(conditionInfo("1e-","2018-11-18","2018-11-23","2h","1h") == false); 
- 
-	
+	assert(conditionInfo("1e-","2018-11-18","2018-11-23","2h","1h") == false);
+
 };
